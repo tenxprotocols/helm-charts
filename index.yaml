@@ -1,0 +1,18 @@
+apiVersion: v1
+entries:
+  domain-exporter:
+  - apiVersion: v2
+    appVersion: v1.24.1
+    created: "2025-11-17T20:52:05.977565881Z"
+    description: A Helm chart for Kubernetes
+    digest: 2f646d84b614d19b01e3296882d0dfcf4a46c06d7580520d5a4ecf6747c82247
+    maintainers:
+    - email: software@tenx.inc
+      name: TenXProtocols
+      url: https://github.com/tenxprotocols
+    name: domain-exporter
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/domain-exporter-0.1.0/domain-exporter-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-11-17T20:52:05.977571562Z"
