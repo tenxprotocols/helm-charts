@@ -1,0 +1,22 @@
+{
+  "release-type": "helm",
+  "separate-pull-requests": true,
+  "include-component-in-tag": true,
+  "packages": {
+    "charts/dns-exporter": {
+      "component": "dns-exporter"
+    },
+    "charts/domain-exporter": {
+      "component": "domain-exporter"
+    },
+    "charts/http-exporter": {
+      "component": "http-exporter"
+    },
+    "charts/outline": {
+      "component": "outline"
+    },
+    "charts/signatory": {
+      "component": "signatory"
+    }
+  }
+}
