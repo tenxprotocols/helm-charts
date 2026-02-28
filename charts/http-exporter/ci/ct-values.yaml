@@ -6,21 +6,21 @@
 config:
   metric_prefix: ct
   cache_ttl: 60
+  timeout: 10000
   backoff:
     max_retries: 1
     initial_delay: 500
 
   profiles:
     test:
-      - name: block_number
-        help: Current block height
-        type: gauge
-        rpc:
-          method: eth_blockNumber
-          params: []
+      metrics:
+        - name: block_number
+          help: Current block height
+          type: gauge
+          rpc:
+            method: eth_blockNumber
 
   targets:
     - name: test
-      provider: test
       profile: test
       url: https://ethereum-rpc.publicnode.com
