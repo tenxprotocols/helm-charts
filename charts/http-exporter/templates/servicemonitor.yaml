@@ -2,16 +2,16 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "tenx-http-exporter.fullname" . }}
+  name: {{ include "http-exporter.fullname" . }}
   labels:
-    {{- include "tenx-http-exporter.labels" . | nindent 4 }}
+    {{- include "http-exporter.labels" . | nindent 4 }}
     {{- with .Values.serviceMonitor.additionalLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
   selector:
     matchLabels:
-      {{- include "tenx-http-exporter.selectorLabels" . | nindent 6 }}
+      {{- include "http-exporter.selectorLabels" . | nindent 6 }}
   endpoints:
     - port: http
       path: /metrics

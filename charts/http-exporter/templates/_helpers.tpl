@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "tenx-http-exporter.name" -}}
+{{- define "http-exporter.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "tenx-http-exporter.fullname" -}}
+{{- define "http-exporter.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "tenx-http-exporter.chart" -}}
+{{- define "http-exporter.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "tenx-http-exporter.labels" -}}
-helm.sh/chart: {{ include "tenx-http-exporter.chart" . }}
-{{ include "tenx-http-exporter.selectorLabels" . }}
+{{- define "http-exporter.labels" -}}
+helm.sh/chart: {{ include "http-exporter.chart" . }}
+{{ include "http-exporter.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "tenx-http-exporter.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "tenx-http-exporter.name" . }}
+{{- define "http-exporter.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "http-exporter.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "tenx-http-exporter.serviceAccountName" -}}
+{{- define "http-exporter.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "tenx-http-exporter.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "http-exporter.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

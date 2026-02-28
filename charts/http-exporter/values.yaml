@@ -1,12 +1,12 @@
 ---
-# Default values for tenx-http-exporter.
+# Default values for http-exporter.
 # This is a YAML-formatted file.
 
 nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: ghcr.io/tenxprotocols/tenx-http-exporter
+  repository: ghcr.io/tenxprotocols/http-exporter
   pullPolicy: IfNotPresent
   # -- Overrides the image tag whose default is the chart appVersion.
   tag: ""

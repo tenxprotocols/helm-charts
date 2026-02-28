@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "tenx-http-exporter.fullname" . }}
+  name: {{ include "http-exporter.fullname" . }}
   labels:
-    {{- include "tenx-http-exporter.labels" . | nindent 4 }}
+    {{- include "http-exporter.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "tenx-http-exporter.fullname" . }}
+    name: {{ include "http-exporter.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
