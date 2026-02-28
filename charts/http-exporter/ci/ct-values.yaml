@@ -1,0 +1,26 @@
+---
+# Minimal values for chart-testing (ct install).
+# Provides the required `profiles` and `targets` so the application
+# can start successfully inside a kind cluster.
+
+config:
+  metric_prefix: ct
+  cache_ttl: 60
+  backoff:
+    max_retries: 1
+    initial_delay: 500
+
+  profiles:
+    test:
+      - name: block_number
+        help: Current block height
+        type: gauge
+        rpc:
+          method: eth_blockNumber
+          params: []
+
+  targets:
+    - name: test
+      provider: test
+      profile: test
+      url: https://ethereum-rpc.publicnode.com
