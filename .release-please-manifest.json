@@ -1,7 +1,7 @@
 {
   "charts/dns-exporter": "0.1.0",
   "charts/domain-exporter": "0.1.0",
-  "charts/http-exporter": "6.0.0",
+  "charts/http-exporter": "5.0.1",
   "charts/outline": "0.1.0",
   "charts/signatory": "0.1.2"
 }
