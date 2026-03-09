@@ -1,0 +1,12 @@
+apiVersion: v2
+name: signatory
+description: A Helm chart for Signatory - a Tezos Remote Signer
+
+maintainers:
+  - name: tenxprotocols
+    email: software@tenx.inc
+    url: https://github.com/tenxprotocols
+
+type: application
+version: 1.3.1
+appVersion: "v1.3.1"

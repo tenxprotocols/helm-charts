@@ -1,0 +1,11 @@
+{{- if empty .Values.signatory.existingConfigMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "signatory.fullname" . }}-config
+  labels:
+    {{- include "signatory.labels" . | nindent 4 }}
+data:
+  signatory.yaml: |
+    {{- toYaml .Values.signatory.config | nindent 4 }}
+{{- end }}

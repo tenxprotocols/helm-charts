@@ -1,0 +1,15 @@
+---
+# Minimal values for chart-testing (ct install).
+# Provides required configuration so the application
+# can start successfully inside a kind cluster.
+
+signatory:
+  config:
+    server:
+      address: :6732
+      utility_address: :9583
+    vaults: {}
+
+  keys:
+    - name: test-key
+      value: ""
