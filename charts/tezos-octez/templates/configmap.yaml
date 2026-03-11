@@ -25,18 +25,6 @@ data:
       "metrics_addr": ["0.0.0.0:{{ .Values.node.metrics.port }}"]
     }
 
-  node-readiness.sh: |
-    #!/bin/sh
-    RESPONSE=$(wget -qO- http://localhost:{{ .Values.node.rpc.port }}/chains/main/is_bootstrapped 2>/dev/null)
-    if [ $? -ne 0 ]; then
-      exit 1
-    fi
-    SYNC_STATE=$(echo "$RESPONSE" | grep -o '"sync_state":"[^"]*"' | cut -d'"' -f4)
-    if [ "$SYNC_STATE" = "synced" ]; then
-      exit 0
-    fi
-    exit 1
-
   baker-wait.sh: |
     #!/bin/sh
     set -e

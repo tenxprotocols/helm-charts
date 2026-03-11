@@ -1,6 +1,6 @@
 global:
-  network: sandbox
-  protocol: "PsQuebec"
+  network: ghostnet
+  protocol: "PtTallinn"
 
 node:
   enabled: true

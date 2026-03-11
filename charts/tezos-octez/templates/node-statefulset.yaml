@@ -128,14 +128,13 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 5
           readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - /etc/tezos/node-readiness.sh
-            initialDelaySeconds: 30
-            periodSeconds: 15
+            httpGet:
+              path: /version
+              port: rpc
+            initialDelaySeconds: 10
+            periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 20
+            failureThreshold: 10
           {{- with .Values.node.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
