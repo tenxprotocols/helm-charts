@@ -1,0 +1,103 @@
+# Default values for tezos-octez.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  # Tezos network name (e.g. mainnet, ghostnet)
+  network: mainnet
+  # Tezos protocol (used for baker binary selection)
+  protocol: PsQuebec
+
+node:
+  enabled: true
+  image:
+    repository: tezos/tezos
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  # Replica count for the node StatefulSet
+  replicaCount: 1
+  storage:
+    size: 250Gi
+    storageClass: "premium-rwo"
+  # Node history mode: full, rolling, archive
+  historyMode: rolling
+  # Additional bootstrap peers
+  peers: []
+  rpc:
+    port: 8732
+  p2p:
+    port: 9732
+  metrics:
+    enabled: true
+    port: 9932
+  resources: {}
+    # limits:
+    #   cpu: "4"
+    #   memory: 16Gi
+    # requests:
+    #   cpu: "2"
+    #   memory: 8Gi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  podLabels: {}
+
+baker:
+  enabled: true
+  image:
+    repository: tezos/tezos
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  signatory:
+    endpoint: "http://signatory.signatory.svc.cluster.local:6732"
+  bakerKey: ""
+  bakerKeyAlias: baker
+  liquidityBakingVote: "pass"
+  adaptiveIssuanceVote: "pass"
+  metrics:
+    enabled: true
+    port: 9933
+  resources: {}
+    # limits:
+    #   cpu: "1"
+    #   memory: 2Gi
+    # requests:
+    #   cpu: 500m
+    #   memory: 1Gi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  podLabels: {}
+
+snapshot:
+  enabled: true
+  # Snapshot download URL (default: tzinit.org rolling snapshot)
+  source: "https://snapshots.tzinit.org"
+  # Snapshot mode: rolling or full
+  mode: rolling
+  resources: {}
+    # limits:
+    #   cpu: "1"
+    #   memory: 2Gi
+    # requests:
+    #   cpu: 500m
+    #   memory: 1Gi
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created.
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account.
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template.
+  name: ""

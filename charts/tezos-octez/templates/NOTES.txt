@@ -1,0 +1,30 @@
+Tezos Octez has been deployed.
+
+{{- if .Values.node.enabled }}
+
+Node:
+  RPC endpoint:
+    kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "tezos-octez.nodeFullname" . }} {{ .Values.node.rpc.port }}:{{ .Values.node.rpc.port }}
+    Then access: http://127.0.0.1:{{ .Values.node.rpc.port }}
+
+  P2P endpoint:
+    The node P2P port is exposed on port {{ .Values.node.p2p.port }}.
+
+  {{- if .Values.node.metrics.enabled }}
+  Metrics endpoint:
+    Prometheus metrics are available on port {{ .Values.node.metrics.port }}.
+  {{- end }}
+{{- end }}
+
+{{- if .Values.baker.enabled }}
+
+Baker:
+  The baker is configured with key alias "{{ .Values.baker.bakerKeyAlias }}".
+  Signatory endpoint: {{ .Values.baker.signatory.endpoint }}
+  Liquidity baking vote: {{ .Values.baker.liquidityBakingVote }}
+  Adaptive issuance vote: {{ .Values.baker.adaptiveIssuanceVote }}
+  {{- if .Values.baker.metrics.enabled }}
+  Metrics endpoint:
+    Prometheus metrics are available on port {{ .Values.baker.metrics.port }}.
+  {{- end }}
+{{- end }}

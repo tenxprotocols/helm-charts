@@ -1,0 +1,24 @@
+global:
+  network: sandbox
+  protocol: "PsQuebec"
+
+node:
+  enabled: true
+  image:
+    tag: "octez-v24.2"
+  storage:
+    size: 1Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+baker:
+  enabled: false
+
+snapshot:
+  enabled: false

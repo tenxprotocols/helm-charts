@@ -1,0 +1,176 @@
+{{- if .Values.node.enabled -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "tezos-octez.nodeFullname" . }}
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+    app.kubernetes.io/component: node
+spec:
+  serviceName: {{ include "tezos-octez.nodeFullname" . }}-headless
+  replicas: {{ .Values.node.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tezos-octez.nodeSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.node.metrics.enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.node.metrics.port }}"
+        prometheus.io/path: "/metrics"
+        {{- end }}
+        {{- with .Values.node.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "tezos-octez.nodeSelectorLabels" . | nindent 8 }}
+        {{- with .Values.node.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tezos-octez.serviceAccountName" . }}
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+        - name: config-init
+          image: "{{ .Values.node.image.repository }}:{{ .Values.node.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.node.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              mkdir -p /var/tezos/node/data
+              cp /etc/tezos/config.json /var/tezos/node/data/config.json
+              if [ ! -f /var/tezos/node/data/identity.json ]; then
+                echo "Generating node identity..."
+                octez-node identity generate --data-dir /var/tezos/node/data
+              fi
+          volumeMounts:
+            - name: data
+              mountPath: /var/tezos/node
+            - name: config
+              mountPath: /etc/tezos
+        {{- if .Values.snapshot.enabled }}
+        - name: snapshot-download
+          image: "{{ .Values.node.image.repository }}:{{ .Values.node.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.node.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - /etc/tezos/snapshot-download.sh
+          {{- with .Values.snapshot.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/tezos/node
+            - name: config
+              mountPath: /etc/tezos
+        - name: snapshot-import
+          image: "{{ .Values.node.image.repository }}:{{ .Values.node.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.node.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - /etc/tezos/snapshot-import.sh
+          {{- with .Values.snapshot.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/tezos/node
+            - name: config
+              mountPath: /etc/tezos
+        {{- end }}
+      containers:
+        - name: octez-node
+          image: "{{ .Values.node.image.repository }}:{{ .Values.node.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.node.image.pullPolicy }}
+          command:
+            - octez-node
+          args:
+            - run
+            - --data-dir
+            - /var/tezos/node/data
+            - --rpc-addr
+            - "0.0.0.0:{{ .Values.node.rpc.port }}"
+            - --net-addr
+            - "[::]:{{ .Values.node.p2p.port }}"
+            {{- if .Values.node.metrics.enabled }}
+            - --metrics-addr
+            - "0.0.0.0:{{ .Values.node.metrics.port }}"
+            {{- end }}
+          ports:
+            - name: rpc
+              containerPort: {{ .Values.node.rpc.port }}
+              protocol: TCP
+            - name: p2p
+              containerPort: {{ .Values.node.p2p.port }}
+              protocol: TCP
+            {{- if .Values.node.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.node.metrics.port }}
+              protocol: TCP
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /version
+              port: rpc
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - /etc/tezos/node-readiness.sh
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 20
+          {{- with .Values.node.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/tezos/node
+            - name: config
+              mountPath: /etc/tezos
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "tezos-octez.nodeFullname" . }}-config
+            defaultMode: 0755
+      {{- with .Values.node.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.node.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.node.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.node.storage.storageClass }}
+        storageClassName: {{ .Values.node.storage.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.node.storage.size }}
+{{- end }}

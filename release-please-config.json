@@ -17,6 +17,9 @@
     },
     "charts/signatory": {
       "component": "signatory"
+    },
+    "charts/tezos-octez": {
+      "component": "tezos-octez"
     }
   }
 }

@@ -3,5 +3,6 @@
   "charts/domain-exporter": "0.1.0",
   "charts/http-exporter": "6.0.0",
   "charts/outline": "0.1.0",
-  "charts/signatory": "1.4.0"
+  "charts/signatory": "1.4.0",
+  "charts/tezos-octez": "0.1.0"
 }

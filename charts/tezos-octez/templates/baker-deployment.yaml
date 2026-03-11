@@ -1,0 +1,119 @@
+{{- if .Values.baker.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tezos-octez.bakerFullname" . }}
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+    app.kubernetes.io/component: baker
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "tezos-octez.bakerSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.baker.metrics.enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.baker.metrics.port }}"
+        prometheus.io/path: "/metrics"
+        {{- end }}
+        {{- with .Values.baker.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "tezos-octez.bakerSelectorLabels" . | nindent 8 }}
+        {{- with .Values.baker.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tezos-octez.serviceAccountName" . }}
+      initContainers:
+        - name: wait-for-node
+          image: "{{ .Values.baker.image.repository }}:{{ .Values.baker.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.baker.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - /etc/tezos/baker-wait.sh
+          volumeMounts:
+            - name: config
+              mountPath: /etc/tezos
+        - name: import-key
+          image: "{{ .Values.baker.image.repository }}:{{ .Values.baker.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.baker.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              NODE_RPC="http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
+              SIGNATORY="{{ .Values.baker.signatory.endpoint }}"
+              BAKER_KEY="{{ .Values.baker.bakerKey }}"
+              ALIAS="{{ .Values.baker.bakerKeyAlias }}"
+              octez-client -d /home/tezos/.tezos-client -E "$NODE_RPC" \
+                import secret key "$ALIAS" "${SIGNATORY%/}/$BAKER_KEY" --force
+          volumeMounts:
+            - name: client-dir
+              mountPath: /home/tezos/.tezos-client
+            - name: config
+              mountPath: /etc/tezos
+      containers:
+        - name: octez-baker
+          image: "{{ .Values.baker.image.repository }}:{{ .Values.baker.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.baker.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              NODE_RPC="http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
+              printf '{"liquidity_baking_toggle_vote":"%s","adaptive_issuance_vote":"%s"}\n' \
+                "{{ .Values.baker.liquidityBakingVote }}" "{{ .Values.baker.adaptiveIssuanceVote }}" \
+                > /home/tezos/.tezos-client/per_block_votes.json
+              exec octez-baker-{{ .Values.global.protocol }} -d /home/tezos/.tezos-client \
+                run with local node "$NODE_RPC" \
+                --votefile /home/tezos/.tezos-client/per_block_votes.json \
+                {{ .Values.baker.bakerKeyAlias }}
+          {{- if .Values.baker.metrics.enabled }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.baker.metrics.port }}
+              protocol: TCP
+          {{- end }}
+          {{- with .Values.baker.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: client-dir
+              mountPath: /home/tezos/.tezos-client
+            - name: config
+              mountPath: /etc/tezos
+      volumes:
+        - name: client-dir
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: {{ include "tezos-octez.nodeFullname" . }}-config
+            defaultMode: 0755
+      {{- with .Values.baker.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.baker.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.baker.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
