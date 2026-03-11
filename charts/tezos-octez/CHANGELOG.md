@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.5...tezos-octez-v0.3.0) (2026-03-11)
+
+
+### Features
+
+* **tezos-octez:** add DAL node StatefulSet and service support ([e91336e](https://github.com/tenxprotocols/helm-charts/commit/e91336e5ecf1f4e65434610969157d0edc27eb87))
+
+
+### Bug Fixes
+
+* **tezos-octez:** correct appVersion prefix and add dal disabled default ([192a360](https://github.com/tenxprotocols/helm-charts/commit/192a360cfcb2eec12796d63d99ea82a7745f035a))
+
 ## [0.2.5](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.4...tezos-octez-v0.2.5) (2026-03-11)
 
 
