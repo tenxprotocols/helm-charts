@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.2...tezos-octez-v0.2.3) (2026-03-11)
+
+
+### Bug Fixes
+
+* **tezos-octez:** use shared emptyDir volume for snapshot tmp file ([28ad4a4](https://github.com/tenxprotocols/helm-charts/commit/28ad4a4e7afd1f0098e5564a0780170b1b9308b1))
+
 ## [0.2.2](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.1...tezos-octez-v0.2.2) (2026-03-11)
 
 
