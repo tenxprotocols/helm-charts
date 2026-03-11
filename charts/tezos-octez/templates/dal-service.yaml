@@ -1,0 +1,51 @@
+{{- if .Values.dal.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tezos-octez.dalFullname" . }}
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dal
+spec:
+  type: ClusterIP
+  ports:
+    - name: rpc
+      port: {{ .Values.dal.rpc.port }}
+      targetPort: rpc
+      protocol: TCP
+    - name: p2p
+      port: {{ .Values.dal.p2p.port }}
+      targetPort: p2p
+      protocol: TCP
+    {{- if .Values.dal.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.dal.metrics.port }}
+      targetPort: metrics
+      protocol: TCP
+    {{- end }}
+  selector:
+    {{- include "tezos-octez.dalSelectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tezos-octez.dalFullname" . }}-headless
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dal
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: rpc
+      port: {{ .Values.dal.rpc.port }}
+      targetPort: rpc
+      protocol: TCP
+    - name: p2p
+      port: {{ .Values.dal.p2p.port }}
+      targetPort: p2p
+      protocol: TCP
+  selector:
+    {{- include "tezos-octez.dalSelectorLabels" . | nindent 4 }}
+{{- end }}

@@ -90,3 +90,18 @@ Baker fully qualified name
 {{- define "tezos-octez.bakerFullname" -}}
 {{- printf "%s-baker" (include "tezos-octez.fullname" .) }}
 {{- end }}
+
+{{/*
+DAL node fully qualified name
+*/}}
+{{- define "tezos-octez.dalFullname" -}}
+{{- printf "%s-dal" (include "tezos-octez.fullname" .) }}
+{{- end }}
+
+{{/*
+DAL node selector labels
+*/}}
+{{- define "tezos-octez.dalSelectorLabels" -}}
+{{ include "tezos-octez.selectorLabels" . }}
+app.kubernetes.io/component: dal
+{{- end }}

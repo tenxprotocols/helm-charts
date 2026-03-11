@@ -56,7 +56,6 @@ baker:
   bakerKey: ""
   bakerKeyAlias: baker
   liquidityBakingVote: "pass"
-  adaptiveIssuanceVote: "pass"
   metrics:
     enabled: true
     port: 9933
@@ -67,6 +66,49 @@ baker:
     # requests:
     #   cpu: 500m
     #   memory: 1Gi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  podLabels: {}
+
+dal:
+  enabled: true
+  # External DAL node endpoint. When set, the baker uses this instead of the in-chart DAL node.
+  # Set enabled: false and externalEndpoint to use an external DAL node.
+  # Set both to false/empty to run --without-dal.
+  externalEndpoint: ""
+  image:
+    repository: tezos/tezos
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  rpc:
+    port: 10732
+  p2p:
+    port: 11732
+  metrics:
+    enabled: true
+    port: 11733
+  # DAL node profiles
+  attesterProfiles: []
+  operatorProfiles: []
+  observerProfiles: []
+  bootstrapProfile: false
+  # Additional DAL peers
+  peers: []
+  # History mode: number, "full", or "auto"
+  historyMode: "auto"
+  storage:
+    size: 50Gi
+    storageClass: "premium-rwo"
+  resources: {}
+    # limits:
+    #   cpu: "2"
+    #   memory: 4Gi
+    # requests:
+    #   cpu: "1"
+    #   memory: 2Gi
   nodeSelector: {}
   tolerations: []
   affinity: {}

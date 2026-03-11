@@ -1,0 +1,126 @@
+{{- if .Values.dal.enabled -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "tezos-octez.dalFullname" . }}
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dal
+spec:
+  serviceName: {{ include "tezos-octez.dalFullname" . }}-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "tezos-octez.dalSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- if .Values.dal.metrics.enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.dal.metrics.port }}"
+        prometheus.io/path: "/metrics"
+        {{- end }}
+        {{- with .Values.dal.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "tezos-octez.dalSelectorLabels" . | nindent 8 }}
+        {{- with .Values.dal.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tezos-octez.serviceAccountName" . }}
+      containers:
+        - name: octez-dal
+          image: "{{ .Values.dal.image.repository }}:{{ .Values.dal.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.dal.image.pullPolicy }}
+          env:
+            - name: NODE_RPC_URL
+              value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
+            - name: DATA_DIR
+              value: /var/tezos/dal
+          command:
+            - octez-baker
+          args:
+            - run
+            - dal
+            - -d
+            - /var/tezos/dal
+            - -E
+            - "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
+            - --rpc-addr
+            - "0.0.0.0:{{ .Values.dal.rpc.port }}"
+            - --net-addr
+            - "0.0.0.0:{{ .Values.dal.p2p.port }}"
+            {{- if .Values.dal.metrics.enabled }}
+            - --metrics-addr
+            - "0.0.0.0:{{ .Values.dal.metrics.port }}"
+            {{- end }}
+            {{- if .Values.dal.attesterProfiles }}
+            - --attester-profiles
+            - {{ .Values.dal.attesterProfiles | join "," | quote }}
+            {{- end }}
+            {{- if .Values.dal.operatorProfiles }}
+            - --operator-profiles
+            - {{ .Values.dal.operatorProfiles | join "," | quote }}
+            {{- end }}
+            {{- if .Values.dal.observerProfiles }}
+            - --observer-profiles
+            - {{ .Values.dal.observerProfiles | join "," | quote }}
+            {{- end }}
+            {{- if .Values.dal.bootstrapProfile }}
+            - --bootstrap-profile
+            {{- end }}
+            {{- if .Values.dal.peers }}
+            - --peers
+            - {{ .Values.dal.peers | join "," | quote }}
+            {{- end }}
+            - --history-mode
+            - {{ .Values.dal.historyMode | quote }}
+          ports:
+            - name: rpc
+              containerPort: {{ .Values.dal.rpc.port }}
+              protocol: TCP
+            - name: p2p
+              containerPort: {{ .Values.dal.p2p.port }}
+              protocol: TCP
+            {{- if .Values.dal.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.dal.metrics.port }}
+              protocol: TCP
+            {{- end }}
+          {{- with .Values.dal.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: dal-data
+              mountPath: /var/tezos/dal
+      {{- with .Values.dal.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dal.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dal.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: dal-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.dal.storage.storageClass }}
+        storageClassName: {{ .Values.dal.storage.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.dal.storage.size }}
+{{- end }}
