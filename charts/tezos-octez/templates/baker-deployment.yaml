@@ -98,8 +98,8 @@ spec:
               printf '{"liquidity_baking_toggle_vote":"%s","adaptive_issuance_vote":"%s"}\n' \
                 "${LIQUIDITY_BAKING_VOTE}" "${ADAPTIVE_ISSUANCE_VOTE}" \
                 > "${CLIENT_DIR}/per_block_votes.json"
-              exec octez-baker -d "${CLIENT_DIR}" \
-                run with local node "${NODE_RPC_URL}" \
+              exec octez-baker -E "${NODE_RPC_URL}" -d "${CLIENT_DIR}" \
+                run remotely \
                 --votefile "${CLIENT_DIR}/per_block_votes.json" \
                 ${BAKER_KEY_ALIAS}
           {{- if .Values.baker.metrics.enabled }}
