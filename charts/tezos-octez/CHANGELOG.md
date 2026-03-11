@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.3...tezos-octez-v0.2.4) (2026-03-11)
+
+
+### Bug Fixes
+
+* **tezos-octez:** use protocol-agnostic octez-baker binary ([28454a3](https://github.com/tenxprotocols/helm-charts/commit/28454a35fd26209a4d4044af60598fc9e43b7c0d))
+
 ## [0.2.3](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.2...tezos-octez-v0.2.3) (2026-03-11)
 
 
