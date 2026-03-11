@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.1...tezos-octez-v0.2.2) (2026-03-11)
+
+
+### Bug Fixes
+
+* **tezos-octez:** replace hardcoded values with env vars in templates ([9f855a2](https://github.com/tenxprotocols/helm-charts/commit/9f855a28eaee152efa1dad94b28727dd6e2d32a8))
+
 ## [0.2.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.0...tezos-octez-v0.2.1) (2026-03-11)
 
 
