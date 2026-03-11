@@ -11,11 +11,11 @@ node:
     storageClass: ""
   resources:
     requests:
-      cpu: "100m"
-      memory: "256Mi"
-    limits:
       cpu: "500m"
-      memory: "512Mi"
+      memory: "2Gi"
+    limits:
+      cpu: "2"
+      memory: "4Gi"
 
 baker:
   enabled: false
