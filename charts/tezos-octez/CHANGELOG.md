@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.0...tezos-octez-v0.2.1) (2026-03-11)
+
+
+### Bug Fixes
+
+* **configmap:** simplify snapshot URL construction ([dde52c5](https://github.com/tenxprotocols/helm-charts/commit/dde52c5ec8d73f905d18d1badb90a6aafb6f669b))
+
 ## [0.2.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.1.0...tezos-octez-v0.2.0) (2026-03-11)
 
 
