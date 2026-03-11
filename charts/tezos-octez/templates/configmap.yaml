@@ -11,7 +11,13 @@ data:
       "data-dir": "/var/tezos/node/data",
       "network": "{{ .Values.global.network }}",
       "rpc": {
-        "listen-addrs": ["0.0.0.0:{{ .Values.node.rpc.port }}"]
+        "listen-addrs": ["0.0.0.0:{{ .Values.node.rpc.port }}"],
+        "acl": [
+          {
+            "address": "0.0.0.0:{{ .Values.node.rpc.port }}",
+            "blacklist": []
+          }
+        ]
       },
       "p2p": {
         "listen-addr": "[::]:{{ .Values.node.p2p.port }}"
