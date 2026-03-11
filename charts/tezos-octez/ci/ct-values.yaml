@@ -20,5 +20,8 @@ node:
 baker:
   enabled: false
 
+dal:
+  enabled: false
+
 snapshot:
   enabled: false
