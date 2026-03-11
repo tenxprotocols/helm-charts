@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.3.0...tezos-octez-v0.3.1) (2026-03-11)
+
+
+### Bug Fixes
+
+* **tezos-octez:** add RPC ACL config with empty blacklist ([5c9d20d](https://github.com/tenxprotocols/helm-charts/commit/5c9d20dd027656cf3e5224b0af9ac3dac1904545))
+
 ## [0.3.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.5...tezos-octez-v0.3.0) (2026-03-11)
 
 
