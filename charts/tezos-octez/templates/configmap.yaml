@@ -42,7 +42,7 @@ data:
   snapshot-download.sh: |
     #!/bin/sh
     set -e
-    SNAPSHOT_FILE="${DATA_DIR}/snapshot.file"
+    SNAPSHOT_FILE="/tmp/snapshot.file"
     MARKER_FILE="${DATA_DIR}/.snapshot-imported"
 
     # Skip if already imported or if context/store exists
@@ -65,7 +65,7 @@ data:
   snapshot-import.sh: |
     #!/bin/sh
     set -e
-    SNAPSHOT_FILE="${DATA_DIR}/snapshot.file"
+    SNAPSHOT_FILE="/tmp/snapshot.file"
     MARKER_FILE="${DATA_DIR}/.snapshot-imported"
 
     if [ -f "$MARKER_FILE" ]; then
