@@ -30,7 +30,7 @@ data:
     set -e
     echo "Waiting for node to be fully synced..."
     while true; do
-      RESULT=$(wget -qO- http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}/chains/main/is_bootstrapped 2>/dev/null || echo "")
+      RESULT=$(wget -qO- "${NODE_RPC_URL}/chains/main/is_bootstrapped" 2>/dev/null || echo "")
       if echo "$RESULT" | grep -q '"sync_state":"synced"'; then
         echo "Node is synced."
         break
@@ -42,8 +42,8 @@ data:
   snapshot-download.sh: |
     #!/bin/sh
     set -e
-    SNAPSHOT_FILE="/var/tezos/node/data/snapshot.file"
-    MARKER_FILE="/var/tezos/node/data/.snapshot-imported"
+    SNAPSHOT_FILE="${DATA_DIR}/snapshot.file"
+    MARKER_FILE="${DATA_DIR}/.snapshot-imported"
 
     # Skip if already imported or if context/store exists
     if [ -f "$MARKER_FILE" ]; then
@@ -51,12 +51,12 @@ data:
       exit 0
     fi
 
-    if [ -f "/var/tezos/node/data/context/store.dict" ]; then
+    if [ -f "${DATA_DIR}/context/store.dict" ]; then
       echo "Node data already exists (context/store.dict found). Skipping download."
       exit 0
     fi
 
-    SNAPSHOT_URL="{{ .Values.snapshot.source }}/{{ .Values.global.network }}/{{ .Values.snapshot.mode }}"
+    SNAPSHOT_URL="${SNAPSHOT_SOURCE}/${NETWORK}/${SNAPSHOT_MODE}"
 
     echo "Downloading snapshot from $SNAPSHOT_URL..."
     wget -O "$SNAPSHOT_FILE" "$SNAPSHOT_URL"
@@ -65,8 +65,8 @@ data:
   snapshot-import.sh: |
     #!/bin/sh
     set -e
-    SNAPSHOT_FILE="/var/tezos/node/data/snapshot.file"
-    MARKER_FILE="/var/tezos/node/data/.snapshot-imported"
+    SNAPSHOT_FILE="${DATA_DIR}/snapshot.file"
+    MARKER_FILE="${DATA_DIR}/.snapshot-imported"
 
     if [ -f "$MARKER_FILE" ]; then
       echo "Snapshot already imported. Skipping."
@@ -78,13 +78,13 @@ data:
       exit 0
     fi
 
-    if [ ! -f "$DATA_DIR/data/config.json" ]; then
-      echo "Initializing node config for {{ .Values.global.network }} ..."
-      octez-node config init --data-dir "$DATA_DIR/data" --network "{{ .Values.global.network }}"
+    if [ ! -f "${DATA_DIR}/config.json" ]; then
+      echo "Initializing node config for ${NETWORK}..."
+      octez-node config init --data-dir "${DATA_DIR}" --network "${NETWORK}"
     fi
 
     echo "Importing snapshot..."
-    octez-node snapshot import "$SNAPSHOT_FILE" --data-dir /var/tezos/node/data --no-check
+    octez-node snapshot import "$SNAPSHOT_FILE" --data-dir "${DATA_DIR}" --no-check
     echo "Snapshot import complete."
 
     # Write marker file and clean up snapshot

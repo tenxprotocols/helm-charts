@@ -41,16 +41,19 @@ spec:
         - name: config-init
           image: "{{ .Values.node.image.repository }}:{{ .Values.node.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.node.image.pullPolicy }}
+          env:
+            - name: DATA_DIR
+              value: /var/tezos/node/data
           command:
             - /bin/sh
             - -c
             - |
               set -e
-              mkdir -p /var/tezos/node/data
-              cp /etc/tezos/config.json /var/tezos/node/data/config.json
-              if [ ! -f /var/tezos/node/data/identity.json ]; then
+              mkdir -p "${DATA_DIR}"
+              cp /etc/tezos/config.json "${DATA_DIR}/config.json"
+              if [ ! -f "${DATA_DIR}/identity.json" ]; then
                 echo "Generating node identity..."
-                octez-node identity generate --data-dir /var/tezos/node/data
+                octez-node identity generate --data-dir "${DATA_DIR}"
               fi
           volumeMounts:
             - name: data
@@ -61,6 +64,15 @@ spec:
         - name: snapshot-download
           image: "{{ .Values.node.image.repository }}:{{ .Values.node.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.node.image.pullPolicy }}
+          env:
+            - name: DATA_DIR
+              value: /var/tezos/node/data
+            - name: NETWORK
+              value: {{ .Values.global.network | quote }}
+            - name: SNAPSHOT_SOURCE
+              value: {{ .Values.snapshot.source | quote }}
+            - name: SNAPSHOT_MODE
+              value: {{ .Values.snapshot.mode | quote }}
           command:
             - /bin/sh
             - /etc/tezos/snapshot-download.sh
@@ -76,6 +88,11 @@ spec:
         - name: snapshot-import
           image: "{{ .Values.node.image.repository }}:{{ .Values.node.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.node.image.pullPolicy }}
+          env:
+            - name: DATA_DIR
+              value: /var/tezos/node/data
+            - name: NETWORK
+              value: {{ .Values.global.network | quote }}
           command:
             - /bin/sh
             - /etc/tezos/snapshot-import.sh

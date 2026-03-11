@@ -40,6 +40,9 @@ spec:
         - name: wait-for-node
           image: "{{ .Values.baker.image.repository }}:{{ .Values.baker.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.baker.image.pullPolicy }}
+          env:
+            - name: NODE_RPC_URL
+              value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
           command:
             - /bin/sh
             - /etc/tezos/baker-wait.sh
@@ -49,17 +52,24 @@ spec:
         - name: import-key
           image: "{{ .Values.baker.image.repository }}:{{ .Values.baker.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.baker.image.pullPolicy }}
+          env:
+            - name: NODE_RPC_URL
+              value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
+            - name: SIGNATORY_URL
+              value: {{ .Values.baker.signatory.endpoint | quote }}
+            - name: BAKER_KEY
+              value: {{ .Values.baker.bakerKey | quote }}
+            - name: BAKER_KEY_ALIAS
+              value: {{ .Values.baker.bakerKeyAlias | quote }}
+            - name: CLIENT_DIR
+              value: /home/tezos/.tezos-client
           command:
             - /bin/sh
             - -c
             - |
               set -e
-              NODE_RPC="http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
-              SIGNATORY="{{ .Values.baker.signatory.endpoint }}"
-              BAKER_KEY="{{ .Values.baker.bakerKey }}"
-              ALIAS="{{ .Values.baker.bakerKeyAlias }}"
-              octez-client -d /home/tezos/.tezos-client -E "$NODE_RPC" \
-                import secret key "$ALIAS" "${SIGNATORY%/}/$BAKER_KEY" --force
+              octez-client -d "${CLIENT_DIR}" -E "${NODE_RPC_URL}" \
+                import secret key "${BAKER_KEY_ALIAS}" "${SIGNATORY_URL%/}/${BAKER_KEY}" --force
           volumeMounts:
             - name: client-dir
               mountPath: /home/tezos/.tezos-client
@@ -69,19 +79,31 @@ spec:
         - name: octez-baker
           image: "{{ .Values.baker.image.repository }}:{{ .Values.baker.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.baker.image.pullPolicy }}
+          env:
+            - name: NODE_RPC_URL
+              value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
+            - name: PROTOCOL
+              value: {{ .Values.global.protocol | quote }}
+            - name: BAKER_KEY_ALIAS
+              value: {{ .Values.baker.bakerKeyAlias | quote }}
+            - name: LIQUIDITY_BAKING_VOTE
+              value: {{ .Values.baker.liquidityBakingVote | quote }}
+            - name: ADAPTIVE_ISSUANCE_VOTE
+              value: {{ .Values.baker.adaptiveIssuanceVote | quote }}
+            - name: CLIENT_DIR
+              value: /home/tezos/.tezos-client
           command:
             - /bin/sh
             - -c
             - |
               set -e
-              NODE_RPC="http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
               printf '{"liquidity_baking_toggle_vote":"%s","adaptive_issuance_vote":"%s"}\n' \
-                "{{ .Values.baker.liquidityBakingVote }}" "{{ .Values.baker.adaptiveIssuanceVote }}" \
-                > /home/tezos/.tezos-client/per_block_votes.json
-              exec octez-baker-{{ .Values.global.protocol }} -d /home/tezos/.tezos-client \
-                run with local node "$NODE_RPC" \
-                --votefile /home/tezos/.tezos-client/per_block_votes.json \
-                {{ .Values.baker.bakerKeyAlias }}
+                "${LIQUIDITY_BAKING_VOTE}" "${ADAPTIVE_ISSUANCE_VOTE}" \
+                > "${CLIENT_DIR}/per_block_votes.json"
+              exec octez-baker-${PROTOCOL} -d "${CLIENT_DIR}" \
+                run with local node "${NODE_RPC_URL}" \
+                --votefile "${CLIENT_DIR}/per_block_votes.json" \
+                ${BAKER_KEY_ALIAS}
           {{- if .Values.baker.metrics.enabled }}
           ports:
             - name: metrics
