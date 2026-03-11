@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.4...tezos-octez-v0.2.5) (2026-03-11)
+
+
+### Bug Fixes
+
+* **tezos-octez:** use remote endpoint flag for octez-baker command ([1bd14b4](https://github.com/tenxprotocols/helm-charts/commit/1bd14b402122ed6b2afcf440402fa8c2cf02a2b7))
+
 ## [0.2.4](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.2.3...tezos-octez-v0.2.4) (2026-03-11)
 
 
