@@ -56,10 +56,7 @@ data:
       exit 0
     fi
 
-    SNAPSHOT_URL="{{ .Values.snapshot.source }}"
-    if [ -z "$SNAPSHOT_URL" ]; then
-      SNAPSHOT_URL="https://snapshots.tzinit.org/{{ .Values.global.network }}/{{ .Values.snapshot.mode }}"
-    fi
+    SNAPSHOT_URL="{{ .Values.snapshot.source }}/{{ .Values.global.network }}/{{ .Values.snapshot.mode }}"
 
     echo "Downloading snapshot from $SNAPSHOT_URL..."
     wget -O "$SNAPSHOT_FILE" "$SNAPSHOT_URL"
