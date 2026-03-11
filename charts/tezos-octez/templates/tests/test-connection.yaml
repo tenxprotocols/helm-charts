@@ -1,0 +1,17 @@
+{{- if .Values.node.enabled -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "tezos-octez.fullname" . }}-test-connection"
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}/version']
+  restartPolicy: Never
+{{- end }}

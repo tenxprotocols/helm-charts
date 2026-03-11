@@ -1,0 +1,12 @@
+apiVersion: v2
+name: tezos-octez
+description: A Helm chart for running a Tezos Octez node and baker
+
+maintainers:
+  - name: tenxprotocols
+    email: software@tenx.inc
+    url: https://github.com/tenxprotocols
+
+type: application
+version: 0.1.0
+appVersion: "v24.2"

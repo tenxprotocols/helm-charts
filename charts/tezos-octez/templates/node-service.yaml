@@ -1,0 +1,28 @@
+{{- if .Values.node.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tezos-octez.nodeFullname" . }}
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+    app.kubernetes.io/component: node
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "tezos-octez.nodeSelectorLabels" . | nindent 4 }}
+  ports:
+    - name: rpc
+      port: {{ .Values.node.rpc.port }}
+      targetPort: rpc
+      protocol: TCP
+    - name: p2p
+      port: {{ .Values.node.p2p.port }}
+      targetPort: p2p
+      protocol: TCP
+    {{- if .Values.node.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.node.metrics.port }}
+      targetPort: metrics
+      protocol: TCP
+    {{- end }}
+{{- end }}

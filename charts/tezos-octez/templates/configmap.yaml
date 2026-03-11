@@ -1,0 +1,97 @@
+{{- if .Values.node.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tezos-octez.nodeFullname" . }}-config
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+data:
+  config.json: |
+    {
+      "data-dir": "/var/tezos/node/data",
+      "network": "{{ .Values.global.network }}",
+      "rpc": {
+        "listen-addrs": ["0.0.0.0:{{ .Values.node.rpc.port }}"]
+      },
+      "p2p": {
+        "listen-addr": "[::]:{{ .Values.node.p2p.port }}"
+        {{- if .Values.node.peers }},
+        "bootstrap-peers": {{ .Values.node.peers | toJson }}
+        {{- end }}
+      },
+      "shell": {
+        "history_mode": "{{ .Values.node.historyMode }}"
+      },
+      "metrics_addr": ["0.0.0.0:{{ .Values.node.metrics.port }}"]
+    }
+
+  baker-wait.sh: |
+    #!/bin/sh
+    set -e
+    echo "Waiting for node to be fully synced..."
+    while true; do
+      RESULT=$(wget -qO- http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}/chains/main/is_bootstrapped 2>/dev/null || echo "")
+      if echo "$RESULT" | grep -q '"sync_state":"synced"'; then
+        echo "Node is synced."
+        break
+      fi
+      echo "Node not yet synced. Retrying in 10s..."
+      sleep 10
+    done
+
+  snapshot-download.sh: |
+    #!/bin/sh
+    set -e
+    SNAPSHOT_FILE="/var/tezos/node/data/snapshot.file"
+    MARKER_FILE="/var/tezos/node/data/.snapshot-imported"
+
+    # Skip if already imported or if context/store exists
+    if [ -f "$MARKER_FILE" ]; then
+      echo "Snapshot already imported (marker file exists). Skipping download."
+      exit 0
+    fi
+
+    if [ -f "/var/tezos/node/data/context/store.dict" ]; then
+      echo "Node data already exists (context/store.dict found). Skipping download."
+      exit 0
+    fi
+
+    SNAPSHOT_URL="{{ .Values.snapshot.source }}"
+    if [ -z "$SNAPSHOT_URL" ]; then
+      SNAPSHOT_URL="https://snapshots.tzinit.org/{{ .Values.global.network }}/{{ .Values.snapshot.mode }}"
+    fi
+
+    echo "Downloading snapshot from $SNAPSHOT_URL..."
+    wget -O "$SNAPSHOT_FILE" "$SNAPSHOT_URL"
+    echo "Snapshot download complete."
+
+  snapshot-import.sh: |
+    #!/bin/sh
+    set -e
+    SNAPSHOT_FILE="/var/tezos/node/data/snapshot.file"
+    MARKER_FILE="/var/tezos/node/data/.snapshot-imported"
+
+    if [ -f "$MARKER_FILE" ]; then
+      echo "Snapshot already imported. Skipping."
+      exit 0
+    fi
+
+    if [ ! -f "$SNAPSHOT_FILE" ]; then
+      echo "No snapshot file found. Skipping import."
+      exit 0
+    fi
+
+    if [ ! -f "$DATA_DIR/data/config.json" ]; then
+      echo "Initializing node config for {{ .Values.global.network }} ..."
+      octez-node config init --data-dir "$DATA_DIR/data" --network "{{ .Values.global.network }}"
+    fi
+
+    echo "Importing snapshot..."
+    octez-node snapshot import "$SNAPSHOT_FILE" --data-dir /var/tezos/node/data --no-check
+    echo "Snapshot import complete."
+
+    # Write marker file and clean up snapshot
+    touch "$MARKER_FILE"
+    rm -f "$SNAPSHOT_FILE"
+    echo "Cleanup complete."
+{{- end }}
