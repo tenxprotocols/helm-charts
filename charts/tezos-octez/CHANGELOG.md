@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.0.0...tezos-octez-v2.0.1) (2026-03-12)
+
+
+### Bug Fixes
+
+* **tezos-octez:** only include keys with known public keys in public_keys file ([df8e86d](https://github.com/tenxprotocols/helm-charts/commit/df8e86d3ca4d720d976b8ac9fc4c4453b777db3e))
+
 ## [2.0.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v1.0.1...tezos-octez-v2.0.0) (2026-03-12)
 
 
