@@ -41,8 +41,8 @@ data:
         echo "Node is synced."
         break
       fi
-      echo "Node not yet synced. Retrying in 10s..."
-      sleep 10
+      echo "Node not yet synced. Retrying in 5s..."
+      sleep 5
     done
 
   snapshot-download.sh: |
