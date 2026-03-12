@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.0.1...tezos-octez-v2.0.2) (2026-03-12)
+
+
+### Bug Fixes
+
+* **tezos-octez:** include baker public key in public_keys and reduce sync wait ([8814d59](https://github.com/tenxprotocols/helm-charts/commit/8814d5937d8fbd3a3265f056eb5224c22c800483))
+
 ## [2.0.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.0.0...tezos-octez-v2.0.1) (2026-03-12)
 
 
