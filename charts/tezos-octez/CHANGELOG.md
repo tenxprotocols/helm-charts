@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.0.2...tezos-octez-v2.1.0) (2026-03-12)
+
+
+### Features
+
+* **tezos-octez:** add consensus and companion public key support ([867bfc3](https://github.com/tenxprotocols/helm-charts/commit/867bfc371ad99041fc9ff19a5927c6ca1aea815e))
+
 ## [2.0.2](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.0.1...tezos-octez-v2.0.2) (2026-03-12)
 
 
