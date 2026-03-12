@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.1...tezos-octez-v2.1.2) (2026-03-12)
+
+
+### Bug Fixes
+
+* **client-keys-secret:** skip duplicate DAL profile addresses already in keys ([5760b5c](https://github.com/tenxprotocols/helm-charts/commit/5760b5c273ec1f3afdf5e30cba72d511d9926284))
+
 ## [2.1.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.0...tezos-octez-v2.1.1) (2026-03-12)
 
 
