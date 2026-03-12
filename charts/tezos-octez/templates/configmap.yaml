@@ -62,9 +62,9 @@ data:
     mkdir -p "${CLIENT_DIR}"
 
     # Build the Signatory base URL with auth key alias as username if present
-    AUTH_ALIAS="signatory-auth"
+    AUTH_ALIAS="signatory_auth"
     if [ -d "${AUTH_DIR:-}" ] && [ -f "${AUTH_DIR}/secret-key" ]; then
-      # Insert auth alias as username: http://signatory-auth@host:port
+      # Insert auth alias as username: http://signatory_auth@host:port
       signatory_base=$(echo "${SIGNATORY_URL}" | sed "s|://|://${AUTH_ALIAS}@|")
     else
       signatory_base="${SIGNATORY_URL}"
@@ -108,9 +108,9 @@ data:
       auth_sk=$(cat "${AUTH_DIR}/secret-key")
       auth_pk=$(cat "${AUTH_DIR}/public-key")
       auth_pkh=$(cat "${AUTH_DIR}/public-key-hash")
-      sk_entries="${sk_entries}${sep}{\"name\":\"signatory-auth\",\"value\":\"unencrypted:${auth_sk}\"}"
-      pkh_entries="${pkh_entries}${sep}{\"name\":\"signatory-auth\",\"value\":\"${auth_pkh}\"}"
-      pk_entries="${pk_entries}${sep}{\"name\":\"signatory-auth\",\"value\":{\"locator\":\"unencrypted:${auth_sk}\",\"key\":\"${auth_pk}\"}}"
+      sk_entries="${sk_entries}${sep}{\"name\":\"signatory_auth\",\"value\":\"unencrypted:${auth_sk}\"}"
+      pkh_entries="${pkh_entries}${sep}{\"name\":\"signatory_auth\",\"value\":\"${auth_pkh}\"}"
+      pk_entries="${pk_entries}${sep}{\"name\":\"signatory_auth\",\"value\":{\"locator\":\"unencrypted:${auth_sk}\",\"key\":\"${auth_pk}\"}}"
     fi
 
     echo "[${sk_entries}]" > "${CLIENT_DIR}/secret_keys"
