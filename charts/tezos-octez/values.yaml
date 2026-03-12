@@ -6,7 +6,14 @@ global:
   # Tezos network name (e.g. mainnet, ghostnet)
   network: mainnet
   # Tezos protocol (used for baker binary selection)
-  protocol: PsQuebec
+  protocol: PtTallinn
+
+signatory:
+  # Signatory remote signer endpoint, shared by baker and DAL node
+  endpoint: "http://signatory.signatory.svc.cluster.local:6732"
+  # K8s Secret containing authorized_keys auth credentials for Signatory.
+  # Expected keys: secret-key (edsk...), public-key (edpk...), public-key-hash (tz1...)
+  authSecret: ""
 
 node:
   enabled: true
@@ -51,9 +58,14 @@ baker:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-  signatory:
-    endpoint: "http://signatory.signatory.svc.cluster.local:6732"
   bakerKey: ""
+  # Public key (edpk...) for the baker. Required when the key has not been
+  # revealed on chain yet (node RPC won't return it). When empty, the
+  # public key is fetched from the node RPC.
+  bakerPublicKey: ""
+  # Unencrypted secret key (edsk...). When set, the baker uses this
+  # directly instead of a remote signer. Mutually exclusive with signatory.
+  bakerSecretKey: ""
   bakerKeyAlias: baker
   liquidityBakingVote: "pass"
   metrics:

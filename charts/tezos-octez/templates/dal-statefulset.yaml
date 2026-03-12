@@ -1,4 +1,5 @@
 {{- if .Values.dal.enabled -}}
+{{- $allProfiles := concat (.Values.dal.attesterProfiles | default list) (.Values.dal.operatorProfiles | default list) -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -15,6 +16,7 @@ spec:
   template:
     metadata:
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- if .Values.dal.metrics.enabled }}
         prometheus.io/scrape: "true"
         prometheus.io/port: "{{ .Values.dal.metrics.port }}"
@@ -25,6 +27,8 @@ spec:
         {{- end }}
       labels:
         {{- include "tezos-octez.dalSelectorLabels" . | nindent 8 }}
+        tezos.io/chain: tezos
+        tezos.io/network: {{ .Values.global.network }}
         {{- with .Values.dal.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -34,6 +38,50 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "tezos-octez.serviceAccountName" . }}
+      {{- if $allProfiles }}
+      initContainers:
+        - name: wait-for-node
+          image: "{{ .Values.dal.image.repository }}:{{ .Values.dal.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.dal.image.pullPolicy }}
+          env:
+            - name: NODE_RPC_URL
+              value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
+          command:
+            - /bin/sh
+            - /etc/tezos/baker-wait.sh
+          volumeMounts:
+            - name: config
+              mountPath: /etc/tezos
+        - name: import-keys
+          image: "{{ .Values.dal.image.repository }}:{{ .Values.dal.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.dal.image.pullPolicy }}
+          env:
+            - name: CLIENT_DIR
+              value: /home/tezos/.tezos-client
+            - name: NODE_RPC_URL
+              value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
+            - name: SIGNATORY_URL
+              value: {{ .Values.signatory.endpoint | quote }}
+            - name: KEY_PAIRS
+              value: {{ range $i, $addr := $allProfiles }}{{ if $i }} {{ end }}{{ printf "profile-%d:%s" $i $addr }}{{ end }}
+            {{- if .Values.signatory.authSecret }}
+            - name: AUTH_DIR
+              value: /etc/signatory-auth
+            {{- end }}
+          command:
+            - /bin/sh
+            - /etc/tezos/import-keys.sh
+          volumeMounts:
+            - name: client-dir
+              mountPath: /home/tezos/.tezos-client
+            - name: config
+              mountPath: /etc/tezos
+            {{- if .Values.signatory.authSecret }}
+            - name: signatory-auth
+              mountPath: /etc/signatory-auth
+              readOnly: true
+            {{- end }}
+      {{- end }}
       containers:
         - name: octez-dal
           image: "{{ .Values.dal.image.repository }}:{{ .Values.dal.image.tag | default .Chart.AppVersion }}"
@@ -46,9 +94,13 @@ spec:
           command:
             - octez-baker
           args:
+            {{- if $allProfiles }}
+            - --base-dir
+            - /home/tezos/.tezos-client
+            {{- end }}
             - run
             - dal
-            - -d
+            - --data-dir
             - /var/tezos/dal
             - -E
             - "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
@@ -100,6 +152,24 @@ spec:
           volumeMounts:
             - name: dal-data
               mountPath: /var/tezos/dal
+            {{- if $allProfiles }}
+            - name: client-dir
+              mountPath: /home/tezos/.tezos-client
+            {{- end }}
+      volumes:
+        {{- if $allProfiles }}
+        - name: client-dir
+          emptyDir: {}
+        {{- end }}
+        - name: config
+          configMap:
+            name: {{ include "tezos-octez.nodeFullname" . }}-config
+            defaultMode: 0755
+        {{- if .Values.signatory.authSecret }}
+        - name: signatory-auth
+          secret:
+            secretName: {{ .Values.signatory.authSecret }}
+        {{- end }}
       {{- with .Values.dal.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

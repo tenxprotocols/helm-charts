@@ -27,6 +27,8 @@ spec:
         {{- end }}
       labels:
         {{- include "tezos-octez.bakerSelectorLabels" . | nindent 8 }}
+        tezos.io/chain: tezos
+        tezos.io/network: {{ .Values.global.network }}
         {{- with .Values.baker.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -49,32 +51,43 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/tezos
-        - name: import-key
+        - name: import-keys
           image: "{{ .Values.baker.image.repository }}:{{ .Values.baker.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.baker.image.pullPolicy }}
           env:
+            - name: CLIENT_DIR
+              value: /home/tezos/.tezos-client
             - name: NODE_RPC_URL
               value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
             - name: SIGNATORY_URL
-              value: {{ .Values.baker.signatory.endpoint | quote }}
-            - name: BAKER_KEY
-              value: {{ .Values.baker.bakerKey | quote }}
-            - name: BAKER_KEY_ALIAS
-              value: {{ .Values.baker.bakerKeyAlias | quote }}
-            - name: CLIENT_DIR
-              value: /home/tezos/.tezos-client
+              value: {{ .Values.signatory.endpoint | quote }}
+            - name: KEY_PAIRS
+              value: {{ printf "%s:%s" .Values.baker.bakerKeyAlias .Values.baker.bakerKey | quote }}
+            {{- if .Values.baker.bakerSecretKey }}
+            - name: SECRET_KEY
+              value: {{ .Values.baker.bakerSecretKey | quote }}
+            {{- end }}
+            {{- if .Values.baker.bakerPublicKey }}
+            - name: PUBLIC_KEY
+              value: {{ .Values.baker.bakerPublicKey | quote }}
+            {{- end }}
+            {{- if .Values.signatory.authSecret }}
+            - name: AUTH_DIR
+              value: /etc/signatory-auth
+            {{- end }}
           command:
             - /bin/sh
-            - -c
-            - |
-              set -e
-              octez-client -d "${CLIENT_DIR}" -E "${NODE_RPC_URL}" \
-                import secret key "${BAKER_KEY_ALIAS}" "${SIGNATORY_URL%/}/${BAKER_KEY}" --force
+            - /etc/tezos/import-keys.sh
           volumeMounts:
             - name: client-dir
               mountPath: /home/tezos/.tezos-client
             - name: config
               mountPath: /etc/tezos
+            {{- if .Values.signatory.authSecret }}
+            - name: signatory-auth
+              mountPath: /etc/signatory-auth
+              readOnly: true
+            {{- end }}
       containers:
         - name: octez-baker
           image: "{{ .Values.baker.image.repository }}:{{ .Values.baker.image.tag | default .Chart.AppVersion }}"
@@ -129,6 +142,11 @@ spec:
           configMap:
             name: {{ include "tezos-octez.nodeFullname" . }}-config
             defaultMode: 0755
+        {{- if .Values.signatory.authSecret }}
+        - name: signatory-auth
+          secret:
+            secretName: {{ .Values.signatory.authSecret }}
+        {{- end }}
       {{- with .Values.baker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

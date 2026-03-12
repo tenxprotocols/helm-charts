@@ -26,6 +26,8 @@ spec:
         {{- end }}
       labels:
         {{- include "tezos-octez.nodeSelectorLabels" . | nindent 8 }}
+        tezos.io/chain: tezos
+        tezos.io/network: {{ .Values.global.network }}
         {{- with .Values.node.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

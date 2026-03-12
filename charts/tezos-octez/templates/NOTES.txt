@@ -20,9 +20,8 @@ Node:
 
 Baker:
   The baker is configured with key alias "{{ .Values.baker.bakerKeyAlias }}".
-  Signatory endpoint: {{ .Values.baker.signatory.endpoint }}
+  Signatory endpoint: {{ .Values.signatory.endpoint }}
   Liquidity baking vote: {{ .Values.baker.liquidityBakingVote }}
-  Adaptive issuance vote: {{ .Values.baker.adaptiveIssuanceVote }}
   {{- if .Values.baker.metrics.enabled }}
   Metrics endpoint:
     Prometheus metrics are available on port {{ .Values.baker.metrics.port }}.
