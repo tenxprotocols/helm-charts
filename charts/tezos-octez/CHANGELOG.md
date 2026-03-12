@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.3.1...tezos-octez-v1.0.0) (2026-03-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **tezos-octez:** add signatory auth, multi-key import, and DAL attester support
+
+### Features
+
+* **tezos-octez:** add signatory auth, multi-key import, and DAL attester support ([df31d9a](https://github.com/tenxprotocols/helm-charts/commit/df31d9abc3cc52468220eba452b3ca17adf8058a))
+
 ## [0.3.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.3.0...tezos-octez-v0.3.1) (2026-03-11)
 
 
