@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.0...tezos-octez-v2.1.1) (2026-03-12)
+
+
+### Bug Fixes
+
+* **tezos-octez:** add timeout to wget in node sync check ([8db9e7f](https://github.com/tenxprotocols/helm-charts/commit/8db9e7f017d5be729945aa50b0e8701372d822f7))
+* **tezos-octez:** pass consensus and companion key aliases to baker ([8b4d549](https://github.com/tenxprotocols/helm-charts/commit/8b4d5499d35106831636d99717b7996248b28185))
+
 ## [2.1.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.0.2...tezos-octez-v2.1.0) (2026-03-12)
 
 
