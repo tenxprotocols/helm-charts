@@ -83,7 +83,7 @@ spec:
                 --without-dal \
                 {{- end }}
                 --votefile "${CLIENT_DIR}/per_block_votes.json" \
-                ${BAKER_KEY_ALIAS}
+                ${BAKER_KEY_ALIAS}{{- if .Values.baker.consensusKey }} consensus_key{{- end }}{{- if .Values.baker.companionKey }} companion_key{{- end }}
           {{- if .Values.baker.metrics.enabled }}
           ports:
             - name: metrics
