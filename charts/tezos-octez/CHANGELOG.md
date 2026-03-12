@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v1.0.1...tezos-octez-v2.0.0) (2026-03-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **tezos-octez:** replace init-container key import with pre-rendered Secret
+
+### Code Refactoring
+
+* **tezos-octez:** replace init-container key import with pre-rendered Secret ([af61b47](https://github.com/tenxprotocols/helm-charts/commit/af61b472a3371991eb13fea13f20e6d78649195f))
+
 ## [1.0.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v1.0.0...tezos-octez-v1.0.1) (2026-03-12)
 
 
