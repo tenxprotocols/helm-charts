@@ -73,9 +73,14 @@ baker:
   # Consensus key address (tz4...). When the baker key has delegated
   # consensus to another key, set this so the baker can sign with it.
   consensusKey: ""
+  # BLS public key (BLpk...) for the consensus key. Required for the
+  # baker to sign attestations with the consensus key.
+  consensusPublicKey: ""
   # Companion key address (tz4...). Set when using a companion key
   # alongside the consensus key.
   companionKey: ""
+  # BLS public key (BLpk...) for the companion key.
+  companionPublicKey: ""
   liquidityBakingVote: "pass"
   metrics:
     enabled: true
