@@ -36,7 +36,7 @@ data:
     set -e
     echo "Waiting for node to be fully synced..."
     while true; do
-      RESULT=$(wget -qO- "${NODE_RPC_URL}/chains/main/is_bootstrapped" 2>/dev/null || echo "")
+      RESULT=$(wget -qO- -T 2 "${NODE_RPC_URL}/chains/main/is_bootstrapped" 2>/dev/null || echo "")
       if echo "$RESULT" | grep -q '"sync_state":"synced"'; then
         echo "Node is synced."
         break
