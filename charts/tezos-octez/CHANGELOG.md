@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v1.0.0...tezos-octez-v1.0.1) (2026-03-12)
+
+
+### Bug Fixes
+
+* **tezos-octez:** replace hyphens with underscores in signatory auth alias ([491286f](https://github.com/tenxprotocols/helm-charts/commit/491286f3b5eabd7641c0a5fd729f434543dc1150))
+
 ## [1.0.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v0.3.1...tezos-octez-v1.0.0) (2026-03-12)
 
 
