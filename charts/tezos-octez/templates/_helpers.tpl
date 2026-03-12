@@ -105,3 +105,15 @@ DAL node selector labels
 {{ include "tezos-octez.selectorLabels" . }}
 app.kubernetes.io/component: dal
 {{- end }}
+
+{{/*
+Signatory base URL — includes auth alias as username when auth is configured.
+Usage: {{ include "tezos-octez.signatoryUrl" . }}
+*/}}
+{{- define "tezos-octez.signatoryUrl" -}}
+{{- if .Values.signatory.auth.secretKey -}}
+{{- .Values.signatory.endpoint | replace "://" "://signatory_auth@" -}}
+{{- else -}}
+{{- .Values.signatory.endpoint -}}
+{{- end -}}
+{{- end }}

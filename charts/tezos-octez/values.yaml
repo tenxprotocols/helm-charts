@@ -11,9 +11,12 @@ global:
 signatory:
   # Signatory remote signer endpoint, shared by baker and DAL node
   endpoint: "http://signatory.signatory.svc.cluster.local:6732"
-  # K8s Secret containing authorized_keys auth credentials for Signatory.
-  # Expected keys: secret-key (edsk...), public-key (edpk...), public-key-hash (tz1...)
-  authSecret: ""
+  # Signatory authorized_keys authentication. When set, the auth pkh is
+  # used as the URL username and the key is registered in the client.
+  auth:
+    secretKey: ""       # edsk...
+    publicKey: ""       # edpk...
+    publicKeyHash: ""   # tz1...
 
 node:
   enabled: true
@@ -67,6 +70,12 @@ baker:
   # directly instead of a remote signer. Mutually exclusive with signatory.
   bakerSecretKey: ""
   bakerKeyAlias: baker
+  # Consensus key address (tz4...). When the baker key has delegated
+  # consensus to another key, set this so the baker can sign with it.
+  consensusKey: ""
+  # Companion key address (tz4...). Set when using a companion key
+  # alongside the consensus key.
+  companionKey: ""
   liquidityBakingVote: "pass"
   metrics:
     enabled: true
