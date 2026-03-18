@@ -4,5 +4,5 @@
   "charts/http-exporter": "6.0.0",
   "charts/outline": "0.1.0",
   "charts/signatory": "1.4.0",
-  "charts/tezos-octez": "2.1.2"
+  "charts/tezos-octez": "2.1.3"
 }
