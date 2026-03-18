@@ -64,14 +64,10 @@ spec:
             - name: DATA_DIR
               value: /var/tezos/dal
           command:
-            - octez-baker
+            - /bin/sh
+            - /etc/tezos/dal-run.sh
           args:
-            {{- if $allProfiles }}
-            - --base-dir
-            - /home/tezos/.tezos-client
-            {{- end }}
             - run
-            - dal
             - --data-dir
             - /var/tezos/dal
             - -E
@@ -117,37 +113,38 @@ spec:
               containerPort: {{ .Values.dal.metrics.port }}
               protocol: TCP
             {{- end }}
+          startupProbe:
+            httpGet:
+              path: /version
+              port: rpc
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /version
+              port: rpc
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /version
+              port: rpc
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           {{- with .Values.dal.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
+            - name: config
+              mountPath: /etc/tezos
             - name: dal-data
               mountPath: /var/tezos/dal
-            {{- if $allProfiles }}
-            - name: client-dir
-              mountPath: /home/tezos/.tezos-client
-            - name: client-keys
-              mountPath: /home/tezos/.tezos-client/secret_keys
-              subPath: secret_keys
-              readOnly: true
-            - name: client-keys
-              mountPath: /home/tezos/.tezos-client/public_keys
-              subPath: public_keys
-              readOnly: true
-            - name: client-keys
-              mountPath: /home/tezos/.tezos-client/public_key_hashs
-              subPath: public_key_hashs
-              readOnly: true
-            {{- end }}
       volumes:
-        {{- if $allProfiles }}
-        - name: client-dir
-          emptyDir: {}
-        - name: client-keys
-          secret:
-            secretName: {{ include "tezos-octez.fullname" . }}-client-keys
-        {{- end }}
         - name: config
           configMap:
             name: {{ include "tezos-octez.nodeFullname" . }}-config

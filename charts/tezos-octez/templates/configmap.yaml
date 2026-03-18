@@ -45,6 +45,21 @@ data:
       sleep 5
     done
 
+  dal-run.sh: |
+    #!/bin/sh
+    # Restart loop for octez-dal to avoid Kubernetes CrashLoopBackOff.
+    # The gossipsub worker can crash due to an upstream bug, causing
+    # the DAL node to exit 1. This wrapper restarts it quickly with
+    # a short fixed delay instead of Kubernetes' exponential backoff.
+    RESTART_DELAY=5
+    while true; do
+      echo "Starting DAL node..."
+      octez-dal-node "$@"
+      EXIT_CODE=$?
+      echo "DAL node exited with code $EXIT_CODE. Restarting in ${RESTART_DELAY}s..."
+      sleep "$RESTART_DELAY"
+    done
+
   snapshot-download.sh: |
     #!/bin/sh
     set -e
