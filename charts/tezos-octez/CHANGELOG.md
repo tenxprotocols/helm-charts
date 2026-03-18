@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.3](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.2...tezos-octez-v2.1.3) (2026-03-18)
+
+
+### Bug Fixes
+
+* **dal:** add restart wrapper to avoid CrashLoopBackOff ([159f2e9](https://github.com/tenxprotocols/helm-charts/commit/159f2e9ca33610a6fdb3410a7c2bfdbb1126f3cb))
+
 ## [2.1.2](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.1...tezos-octez-v2.1.2) (2026-03-12)
 
 
