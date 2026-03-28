@@ -325,4 +325,19 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/tezos-octez-0.2.0/tezos-octez-0.2.0.tgz
     version: 0.2.0
-generated: "2026-03-28T00:31:35.121563838Z"
+  valkey:
+  - apiVersion: v2
+    appVersion: "8.1"
+    created: "2026-03-28T00:49:20.291860032Z"
+    description: Valkey (Redis-compatible) key/value store
+    digest: bce7498d51bf9fb0b56ce90c66fbaa9b971a473cdc25cd3f82d2c3c8e247a268
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: valkey
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/valkey-0.2.0/valkey-0.2.0.tgz
+    version: 0.2.0
+generated: "2026-03-28T00:49:20.291904835Z"
