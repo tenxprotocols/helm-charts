@@ -1,0 +1,17 @@
+{{- if .Values.gateway.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Values.global.namePrefix }}-test-connection"
+  labels:
+    {{- include "swarmforge.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ .Values.global.namePrefix }}-gateway:{{ .Values.gateway.port }}/healthz']
+  restartPolicy: Never
+{{- end }}

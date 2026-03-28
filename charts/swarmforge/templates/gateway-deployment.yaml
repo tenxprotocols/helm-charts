@@ -1,0 +1,57 @@
+{{- if .Values.gateway.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.global.namePrefix }}-gateway
+  labels:
+    {{- include "swarmforge.componentLabels" (dict "component" "gateway" "context" .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.gateway.replicas }}
+  selector:
+    matchLabels:
+      {{- include "swarmforge.componentSelectorLabels" (dict "component" "gateway" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "swarmforge.componentLabels" (dict "component" "gateway" "context" .) | nindent 8 }}
+    spec:
+      {{- include "swarmforge.imagePullSecrets" . | nindent 6 }}
+      containers:
+        - name: gateway
+          image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: {{ .Values.gateway.port }}
+              protocol: TCP
+          env:
+            {{- include "swarmforge.commonEnv" . | nindent 12 }}
+            - name: PORT
+              value: {{ .Values.gateway.port | quote }}
+            {{- range $key, $value := .Values.gateway.env }}
+            - name: {{ $key | quote }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- if .Values.existingSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          {{- with .Values.gateway.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}

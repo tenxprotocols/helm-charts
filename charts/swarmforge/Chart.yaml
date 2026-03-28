@@ -1,0 +1,23 @@
+---
+apiVersion: v2
+name: swarmforge
+description: SwarmForge AI agent platform — web, gateway, worker, and marketing apps
+
+maintainers:
+  - name: tenxprotocols
+    email: software@tenx.inc
+    url: https://github.com/tenxprotocols
+
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+dependencies:
+  - name: postgres
+    version: "0.2.0"
+    repository: "oci://ghcr.io/tenxprotocols/helm-charts"
+    condition: postgres.enabled
+  - name: valkey
+    version: "0.2.0"
+    repository: "oci://ghcr.io/tenxprotocols/helm-charts"
+    condition: valkey.enabled

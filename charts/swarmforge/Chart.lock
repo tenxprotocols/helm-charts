@@ -1,0 +1,9 @@
+dependencies:
+- name: postgres
+  repository: oci://ghcr.io/tenxprotocols/helm-charts
+  version: 0.2.0
+- name: valkey
+  repository: oci://ghcr.io/tenxprotocols/helm-charts
+  version: 0.2.0
+digest: sha256:ed33f98d8482f87a974f122dd8162f0a96ad2cf85351de7eeb5deefd7dba1b9d
+generated: "2026-03-27T18:04:20.362963-07:00"

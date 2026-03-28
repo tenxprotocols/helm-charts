@@ -1,0 +1,22 @@
+---
+# Minimal values for chart-testing (ct install).
+# Disables all components since the app images require
+# private GHCR access not available in KIND clusters.
+
+web:
+  enabled: false
+
+gateway:
+  enabled: false
+
+worker:
+  enabled: false
+
+marketing:
+  enabled: false
+
+postgres:
+  enabled: false
+
+valkey:
+  enabled: false

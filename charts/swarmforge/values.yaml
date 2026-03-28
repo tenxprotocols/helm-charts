@@ -1,0 +1,80 @@
+---
+global:
+  env: dev
+  namePrefix: swarmforge
+  imagePullSecrets: []
+  #  - name: ghcr-swarmforge
+
+web:
+  enabled: true
+  image:
+    repository: ghcr.io/tenxprotocols/swarmforge/web
+    tag: latest
+  replicas: 1
+  port: 3000
+  env: {}
+  resources: {}
+
+gateway:
+  enabled: true
+  image:
+    repository: ghcr.io/tenxprotocols/swarmforge/gateway
+    tag: latest
+  replicas: 1
+  port: 4000
+  env: {}
+  resources: {}
+
+worker:
+  enabled: true
+  image:
+    repository: ghcr.io/tenxprotocols/swarmforge/worker
+    tag: latest
+  replicas: 1
+  env: {}
+  resources: {}
+
+marketing:
+  enabled: true
+  image:
+    repository: ghcr.io/tenxprotocols/swarmforge/marketing
+    tag: latest
+  replicas: 1
+  port: 3100
+  env: {}
+  resources: {}
+
+# Shared environment variables injected into all components
+env: {}
+
+# Existing secret with env vars to inject into all components via envFrom
+existingSecret: ""
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  #  - host: app.example.com
+  #    paths:
+  #      - path: /
+  #        service: web
+  #  - host: api.example.com
+  #    paths:
+  #      - path: /
+  #        service: gateway
+  tls: []
+
+# Subchart values
+postgres:
+  enabled: true
+  auth:
+    database: swarmforge
+    username: swarmforge
+    password: ""
+    existingSecret: ""
+
+valkey:
+  enabled: true
+  auth:
+    enabled: false

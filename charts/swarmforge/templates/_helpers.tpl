@@ -1,0 +1,95 @@
+{{- define "swarmforge.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "swarmforge.fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "swarmforge.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "swarmforge.labels" -}}
+helm.sh/chart: {{ include "swarmforge.chart" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+{{- end }}
+
+{{- define "swarmforge.componentName" -}}
+{{- printf "%s-%s" .prefix .component | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "swarmforge.componentLabels" -}}
+{{ include "swarmforge.labels" .context }}
+app.kubernetes.io/name: {{ .component }}
+app.kubernetes.io/instance: {{ .context.Values.global.namePrefix }}
+app.kubernetes.io/component: {{ .component }}
+{{- end }}
+
+{{- define "swarmforge.componentSelectorLabels" -}}
+app.kubernetes.io/name: {{ .component }}
+app.kubernetes.io/instance: {{ .context.Values.global.namePrefix }}
+app.kubernetes.io/component: {{ .component }}
+{{- end }}
+
+{{- define "swarmforge.postgresHost" -}}
+{{- printf "%s-postgres" (include "swarmforge.fullname" .) }}
+{{- end }}
+
+{{- define "swarmforge.valkeyHost" -}}
+{{- printf "%s-valkey" (include "swarmforge.fullname" .) }}
+{{- end }}
+
+{{- define "swarmforge.postgresSecretName" -}}
+{{- if .Values.postgres.auth.existingSecret }}
+{{- .Values.postgres.auth.existingSecret }}
+{{- else }}
+{{- printf "%s-postgres" (include "swarmforge.fullname" .) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common environment variables shared across all components.
+DATABASE_URL uses $(POSTGRES_PASSWORD) variable expansion —
+the POSTGRES_PASSWORD env var must appear before DATABASE_URL.
+*/}}
+{{- define "swarmforge.commonEnv" -}}
+- name: NODE_ENV
+  value: {{ .Values.global.env | quote }}
+{{- if .Values.postgres.enabled }}
+- name: POSTGRES_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "swarmforge.postgresSecretName" . }}
+      key: password
+- name: DATABASE_URL
+  value: "postgresql://{{ .Values.postgres.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "swarmforge.postgresHost" . }}:{{ .Values.postgres.service.port | default 5432 }}/{{ .Values.postgres.auth.database }}"
+{{- end }}
+{{- if .Values.valkey.enabled }}
+- name: REDIS_URL
+  value: "redis://{{ include "swarmforge.valkeyHost" . }}:{{ .Values.valkey.service.port | default 6379 }}"
+{{- end }}
+{{- range $key, $value := .Values.env }}
+- name: {{ $key | quote }}
+  value: {{ $value | quote }}
+{{- end }}
+{{- end }}
+
+{{- define "swarmforge.imagePullSecrets" -}}
+{{- with .Values.global.imagePullSecrets }}
+imagePullSecrets:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
