@@ -26,6 +26,9 @@
     },
     "charts/valkey": {
       "component": "valkey"
+    },
+    "charts/swarmforge": {
+      "component": "swarmforge"
     }
   }
 }

@@ -1,0 +1,39 @@
+{{- if .Values.worker.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.global.namePrefix }}-worker
+  labels:
+    {{- include "swarmforge.componentLabels" (dict "component" "worker" "context" .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "swarmforge.componentSelectorLabels" (dict "component" "worker" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "swarmforge.componentLabels" (dict "component" "worker" "context" .) | nindent 8 }}
+    spec:
+      {{- include "swarmforge.imagePullSecrets" . | nindent 6 }}
+      containers:
+        - name: worker
+          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            {{- include "swarmforge.commonEnv" . | nindent 12 }}
+            {{- range $key, $value := .Values.worker.env }}
+            - name: {{ $key | quote }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- if .Values.existingSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+          {{- end }}
+          {{- with .Values.worker.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
