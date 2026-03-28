@@ -41,6 +41,21 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/http-exporter-6.0.0/http-exporter-6.0.0.tgz
     version: 6.0.0
+  postgres:
+  - apiVersion: v2
+    appVersion: "17"
+    created: "2026-03-28T00:31:35.121524495Z"
+    description: PostgreSQL StatefulSet with support for custom images (e.g. pgvector)
+    digest: 129587efad5fd28f8636aa7a61f504b706ebc89f35606af8432bfd3eb1ab53c0
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: postgres
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/postgres-0.2.0/postgres-0.2.0.tgz
+    version: 0.2.0
   signatory:
   - apiVersion: v2
     appVersion: v1.3.1
@@ -310,4 +325,4 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/tezos-octez-0.2.0/tezos-octez-0.2.0.tgz
     version: 0.2.0
-generated: "2026-03-18T22:41:33.839742033Z"
+generated: "2026-03-28T00:31:35.121563838Z"
