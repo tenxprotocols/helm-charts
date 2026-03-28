@@ -1,0 +1,11 @@
+---
+# Minimal values for chart-testing (ct install).
+# Uses a small PVC and sets a password so the chart
+# can start successfully inside a KIND cluster.
+
+auth:
+  password: ct-test-password
+
+storage:
+  size: 1Gi
+  className: ""

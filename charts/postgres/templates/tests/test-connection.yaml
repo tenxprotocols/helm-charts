@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "postgres.fullname" . }}-test-connection"
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: pg-isready
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+      command: ['pg_isready']
+      args: ['-h', '{{ include "postgres.fullname" . }}', '-p', '{{ .Values.service.port }}', '-U', '{{ .Values.auth.username }}']
+  restartPolicy: Never
