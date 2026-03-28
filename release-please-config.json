@@ -23,6 +23,9 @@
     },
     "charts/postgres": {
       "component": "postgres"
+    },
+    "charts/valkey": {
+      "component": "valkey"
     }
   }
 }

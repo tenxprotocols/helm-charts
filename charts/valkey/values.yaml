@@ -1,0 +1,60 @@
+---
+image:
+  repository: valkey/valkey
+  tag: 8.1-alpine
+  pullPolicy: IfNotPresent
+
+auth:
+  # -- Enable password authentication
+  enabled: false
+  # -- Inline password. Ignored when existingSecret is set.
+  password: ""
+  # -- Name of an existing Secret containing key "password"
+  existingSecret: ""
+
+service:
+  type: ClusterIP
+  port: 6379
+
+storage:
+  # -- Set to "" to use emptyDir (ephemeral)
+  size: 2Gi
+  className: ""
+  accessMode: ReadWriteOnce
+
+resources: {}
+  # limits:
+  #   cpu: 250m
+  #   memory: 256Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+livenessProbe:
+  exec:
+    command:
+      - valkey-cli
+      - ping
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+  exec:
+    command:
+      - valkey-cli
+      - ping
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
