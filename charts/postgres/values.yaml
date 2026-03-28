@@ -1,0 +1,61 @@
+---
+image:
+  repository: postgres
+  tag: ""
+  pullPolicy: IfNotPresent
+
+auth:
+  database: postgres
+  username: postgres
+  # -- Inline password. Ignored when existingSecret is set.
+  password: ""
+  # -- Name of an existing Secret containing key "password"
+  existingSecret: ""
+
+service:
+  type: ClusterIP
+  port: 5432
+
+storage:
+  size: 10Gi
+  className: ""
+  accessMode: ReadWriteOnce
+
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 250m
+  #   memory: 256Mi
+
+livenessProbe:
+  exec:
+    command:
+      - pg_isready
+      - -U
+      - $(POSTGRES_USER)
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+  exec:
+    command:
+      - pg_isready
+      - -U
+      - $(POSTGRES_USER)
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

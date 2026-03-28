@@ -1,0 +1,13 @@
+---
+apiVersion: v2
+name: postgres
+description: PostgreSQL StatefulSet with support for custom images (e.g. pgvector)
+
+maintainers:
+  - name: tenxprotocols
+    email: software@tenx.inc
+    url: https://github.com/tenxprotocols
+
+type: application
+version: 0.1.0
+appVersion: "17"

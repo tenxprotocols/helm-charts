@@ -20,6 +20,10 @@
     },
     "charts/tezos-octez": {
       "component": "tezos-octez"
+    },
+    "charts/postgres": {
+      "component": "postgres"
+    }
     }
   }
 }
