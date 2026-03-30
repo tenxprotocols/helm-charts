@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.2.2...swarmforge-v0.2.3) (2026-03-30)
+
+
+### Bug Fixes
+
+* **swarmforge:** set imagePullPolicy to Always, add health probes ([#40](https://github.com/tenxprotocols/helm-charts/issues/40)) ([178b333](https://github.com/tenxprotocols/helm-charts/commit/178b333c8220fbe2dd9a4481dadb4c95d2df900d))
+
 ## [0.2.2](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.2.1...swarmforge-v0.2.2) (2026-03-30)
 
 
