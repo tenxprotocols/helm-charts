@@ -21,8 +21,14 @@ spec:
         - name: worker
           image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
           imagePullPolicy: Always
+          ports:
+            - name: health
+              containerPort: {{ .Values.worker.healthPort }}
+              protocol: TCP
           env:
             {{- include "swarmforge.commonEnv" . | nindent 12 }}
+            - name: HEALTH_PORT
+              value: {{ .Values.worker.healthPort | quote }}
             {{- range $key, $value := .Values.worker.env }}
             - name: {{ $key | quote }}
               value: {{ $value | quote }}
@@ -31,6 +37,14 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .Values.existingSecret }}
+          {{- end }}
+          {{- with .Values.worker.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.worker.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.worker.resources }}
           resources:
