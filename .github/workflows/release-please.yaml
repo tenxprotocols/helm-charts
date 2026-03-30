@@ -65,6 +65,9 @@ jobs:
           mkdir -p .oci
           for path in $(echo "$released" | jq -r '.[]'); do
             echo "Packaging $path"
+            if [ -f "$path/Chart.lock" ]; then
+              helm dependency build "$path"
+            fi
             helm package "$path" --destination .oci
           done
           for pkg in .oci/*.tgz; do
