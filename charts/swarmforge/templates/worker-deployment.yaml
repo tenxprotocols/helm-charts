@@ -20,7 +20,7 @@ spec:
       containers:
         - name: worker
           image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             {{- include "swarmforge.commonEnv" . | nindent 12 }}
             {{- range $key, $value := .Values.worker.env }}
