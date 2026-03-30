@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.2.1...swarmforge-v0.2.2) (2026-03-30)
+
+
+### Bug Fixes
+
+* **swarmforge:** set imagePullPolicy to Always for mutable dev tags ([c894a1f](https://github.com/tenxprotocols/helm-charts/commit/c894a1f9a0eb724d20c7f56ecd5f63cfb2efd580))
+* **swarmforge:** set imagePullPolicy to Always for mutable dev tags ([#38](https://github.com/tenxprotocols/helm-charts/issues/38)) ([080c888](https://github.com/tenxprotocols/helm-charts/commit/080c88803522ae64edff1a71a6755f56a59837be))
+
 ## [0.2.1](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.2.0...swarmforge-v0.2.1) (2026-03-30)
 
 
