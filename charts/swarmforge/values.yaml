@@ -9,7 +9,7 @@ web:
   enabled: true
   image:
     repository: ghcr.io/tenxprotocols/swarmforge/web
-    tag: latest
+    tag: dev
   replicas: 1
   port: 3000
   env: {}
@@ -19,7 +19,7 @@ gateway:
   enabled: true
   image:
     repository: ghcr.io/tenxprotocols/swarmforge/gateway
-    tag: latest
+    tag: dev
   replicas: 1
   port: 4000
   env: {}
@@ -29,7 +29,7 @@ worker:
   enabled: true
   image:
     repository: ghcr.io/tenxprotocols/swarmforge/worker
-    tag: latest
+    tag: dev
   replicas: 1
   env: {}
   resources: {}
@@ -38,7 +38,7 @@ marketing:
   enabled: true
   image:
     repository: ghcr.io/tenxprotocols/swarmforge/marketing
-    tag: latest
+    tag: dev
   replicas: 1
   port: 3100
   env: {}
