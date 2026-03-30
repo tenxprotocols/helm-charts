@@ -20,7 +20,7 @@ spec:
       containers:
         - name: marketing
           image: "{{ .Values.marketing.image.repository }}:{{ .Values.marketing.image.tag }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: {{ .Values.marketing.port }}
