@@ -40,18 +40,14 @@ spec:
             - secretRef:
                 name: {{ .Values.existingSecret }}
           {{- end }}
+          {{- with .Values.marketing.livenessProbe }}
           livenessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.marketing.readinessProbe }}
           readinessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.marketing.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
