@@ -13,7 +13,13 @@ web:
   replicas: 1
   port: 3000
   env: {}
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
   livenessProbe:
     httpGet:
       path: /healthz
@@ -37,7 +43,13 @@ gateway:
   replicas: 1
   port: 4000
   env: {}
-  resources: {}
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
   livenessProbe:
     httpGet:
       path: /healthz
@@ -61,7 +73,13 @@ worker:
   replicas: 1
   healthPort: 4001
   env: {}
-  resources: {}
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
   livenessProbe:
     httpGet:
       path: /healthz
@@ -85,7 +103,13 @@ marketing:
   replicas: 1
   port: 3100
   env: {}
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
   livenessProbe:
     httpGet:
       path: /healthz
@@ -100,6 +124,28 @@ marketing:
     initialDelaySeconds: 5
     periodSeconds: 5
     failureThreshold: 3
+
+# Database migration init container (runs before gateway starts)
+migration:
+  enabled: true
+  image: {}
+  #  repository: ghcr.io/tenxprotocols/swarmforge/gateway
+  #  tag: dev
+  command: ["npm", "run", "db:migrate"]
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Required application environment variables
+# betterAuthUrl and corsOrigin default to https://<ingress web host> when ingress is enabled
+bifrostUrl: ""
+betterAuthUrl: ""
+solanaRpcUrl: ""
+corsOrigin: ""
 
 # Shared environment variables injected into all components
 env: {}

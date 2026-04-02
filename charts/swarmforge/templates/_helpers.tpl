@@ -61,6 +61,36 @@ app.kubernetes.io/component: {{ .component }}
 {{- end }}
 
 {{/*
+Resolve the web-facing ingress URL. Walks ingress.hosts looking for
+a path whose service is "web" and returns https://host (or http:// if
+no TLS covers that host).
+*/}}
+{{- define "swarmforge.webIngressUrl" -}}
+{{- $url := "" }}
+{{- if .Values.ingress.enabled }}
+  {{- $tlsHosts := list }}
+  {{- range .Values.ingress.tls }}
+    {{- range .hosts }}
+      {{- $tlsHosts = append $tlsHosts . }}
+    {{- end }}
+  {{- end }}
+  {{- range .Values.ingress.hosts }}
+    {{- $host := .host }}
+    {{- range .paths }}
+      {{- if eq .service "web" }}
+        {{- if has $host $tlsHosts }}
+          {{- $url = printf "https://%s" $host }}
+        {{- else }}
+          {{- $url = printf "http://%s" $host }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- $url }}
+{{- end }}
+
+{{/*
 Common environment variables shared across all components.
 DATABASE_URL uses $(POSTGRES_PASSWORD) variable expansion —
 the POSTGRES_PASSWORD env var must appear before DATABASE_URL.
@@ -81,6 +111,19 @@ the POSTGRES_PASSWORD env var must appear before DATABASE_URL.
 - name: REDIS_URL
   value: "redis://{{ include "swarmforge.valkeyHost" . }}:{{ .Values.valkey.service.port | default 6379 }}"
 {{- end }}
+{{- if .Values.bifrostUrl }}
+- name: BIFROST_URL
+  value: {{ .Values.bifrostUrl | quote }}
+{{- end }}
+{{- if .Values.solanaRpcUrl }}
+- name: SOLANA_RPC_URL
+  value: {{ .Values.solanaRpcUrl | quote }}
+{{- end }}
+{{- $webUrl := include "swarmforge.webIngressUrl" . }}
+- name: BETTER_AUTH_URL
+  value: {{ .Values.betterAuthUrl | default $webUrl | quote }}
+- name: CORS_ORIGIN
+  value: {{ .Values.corsOrigin | default $webUrl | quote }}
 {{- range $key, $value := .Values.env }}
 - name: {{ $key | quote }}
   value: {{ $value | quote }}

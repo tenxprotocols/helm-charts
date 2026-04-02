@@ -17,6 +17,28 @@ spec:
         {{- include "swarmforge.componentLabels" (dict "component" "gateway" "context" .) | nindent 8 }}
     spec:
       {{- include "swarmforge.imagePullSecrets" . | nindent 6 }}
+      {{- if .Values.migration.enabled }}
+      initContainers:
+        - name: migrate
+          image: "{{ .Values.migration.image.repository | default .Values.gateway.image.repository }}:{{ .Values.migration.image.tag | default .Values.gateway.image.tag }}"
+          imagePullPolicy: Always
+          command: {{ toJson .Values.migration.command }}
+          env:
+            {{- include "swarmforge.commonEnv" . | nindent 12 }}
+            {{- range $key, $value := .Values.gateway.env }}
+            - name: {{ $key | quote }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- if .Values.existingSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+          {{- end }}
+          {{- with .Values.migration.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- end }}
       containers:
         - name: gateway
           image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
