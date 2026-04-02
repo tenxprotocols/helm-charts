@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.3.0...swarmforge-v0.3.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* **swarmforge:** disable migration init container in CI test values ([f4ce23f](https://github.com/tenxprotocols/helm-charts/commit/f4ce23fa4158dfd2453f6631192cbc1e66d68d74))
+
 ## [0.3.0](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.2.3...swarmforge-v0.3.0) (2026-04-02)
 
 
