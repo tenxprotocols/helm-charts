@@ -15,6 +15,9 @@ worker:
 marketing:
   enabled: false
 
+migration:
+  enabled: false
+
 postgres:
   enabled: false
 
