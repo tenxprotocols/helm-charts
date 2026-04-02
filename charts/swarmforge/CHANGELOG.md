@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.2.3...swarmforge-v0.3.0) (2026-04-02)
+
+
+### Features
+
+* **helm:** add migration init container, resource limits, and env helpers ([9d85d6f](https://github.com/tenxprotocols/helm-charts/commit/9d85d6f6afba7487690da13d288b85c08929546e))
+
 ## [0.2.3](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.2.2...swarmforge-v0.2.3) (2026-03-30)
 
 
