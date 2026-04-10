@@ -74,6 +74,34 @@ entries:
   swarmforge:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2026-04-10T01:33:12.488902213Z"
+    dependencies:
+    - condition: postgres.enabled
+      name: postgres
+      repository: oci://ghcr.io/tenxprotocols/helm-charts
+      version: 0.2.0
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://ghcr.io/tenxprotocols/helm-charts
+      version: 0.2.0
+    - condition: falkordb.enabled
+      name: falkordb
+      repository: oci://ghcr.io/tenxprotocols/helm-charts
+      version: 0.2.0
+    description: SwarmForge AI agent platform — web, gateway, worker, and marketing
+      apps
+    digest: baee6701aa6f864b2171b2c78b391f526b05289440463d0180fc1141addc0816
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: swarmforge
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/swarmforge-0.4.0/swarmforge-0.4.0.tgz
+    version: 0.4.0
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2026-04-02T17:06:06.916405124Z"
     dependencies:
     - condition: postgres.enabled
@@ -365,4 +393,4 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/valkey-0.2.0/valkey-0.2.0.tgz
     version: 0.2.0
-generated: "2026-04-02T17:06:06.916450388Z"
+generated: "2026-04-10T01:33:12.488950293Z"
