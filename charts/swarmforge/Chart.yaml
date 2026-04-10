@@ -21,3 +21,7 @@ dependencies:
     version: "0.2.0"
     repository: "oci://ghcr.io/tenxprotocols/helm-charts"
     condition: valkey.enabled
+  - name: falkordb
+    version: "0.1.0"
+    repository: "oci://ghcr.io/tenxprotocols/helm-charts"
+    condition: falkordb.enabled

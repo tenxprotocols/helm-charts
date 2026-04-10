@@ -23,3 +23,6 @@ postgres:
 
 valkey:
   enabled: false
+
+falkordb:
+  enabled: false

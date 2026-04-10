@@ -52,6 +52,10 @@ app.kubernetes.io/component: {{ .component }}
 {{- printf "%s-valkey" (include "swarmforge.fullname" .) }}
 {{- end }}
 
+{{- define "swarmforge.falkordbHost" -}}
+{{- printf "%s-falkordb" (include "swarmforge.fullname" .) }}
+{{- end }}
+
 {{- define "swarmforge.postgresSecretName" -}}
 {{- if .Values.postgres.auth.existingSecret }}
 {{- .Values.postgres.auth.existingSecret }}
@@ -110,6 +114,10 @@ the POSTGRES_PASSWORD env var must appear before DATABASE_URL.
 {{- if .Values.valkey.enabled }}
 - name: REDIS_URL
   value: "redis://{{ include "swarmforge.valkeyHost" . }}:{{ .Values.valkey.service.port | default 6379 }}"
+{{- end }}
+{{- if .Values.falkordb.enabled }}
+- name: FALKORDB_URL
+  value: "redis://{{ include "swarmforge.falkordbHost" . }}:{{ .Values.falkordb.service.port | default 6380 }}"
 {{- end }}
 {{- if .Values.bifrostUrl }}
 - name: BIFROST_URL

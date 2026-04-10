@@ -131,7 +131,7 @@ migration:
   image: {}
   #  repository: ghcr.io/tenxprotocols/swarmforge/gateway
   #  tag: dev
-  command: ["npm", "run", "db:migrate"]
+  command: ["node", "packages/db/dist/run-migrate.js"]
   resources:
     requests:
       cpu: 100m
@@ -181,3 +181,8 @@ valkey:
   enabled: true
   auth:
     enabled: false
+
+falkordb:
+  enabled: true
+  service:
+    port: 6380
