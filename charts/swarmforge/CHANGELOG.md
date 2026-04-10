@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.3.1...swarmforge-v0.4.0) (2026-04-10)
+
+
+### Features
+
+* **swarmforge:** add FalkorDB dependency and FALKORDB_URL env var ([9335df2](https://github.com/tenxprotocols/helm-charts/commit/9335df23aa86fa4a660fb0e5625497673e89d547))
+
+
+### Bug Fixes
+
+* **swarmforge:** update falkordb dependency to 0.2.0 and regenerate Chart.lock ([f9dc01c](https://github.com/tenxprotocols/helm-charts/commit/f9dc01c8174a478550e3b91f7c6a3065a1c39187))
+
 ## [0.3.1](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.3.0...swarmforge-v0.3.1) (2026-04-02)
 
 
