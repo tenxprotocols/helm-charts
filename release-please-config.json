@@ -29,6 +29,9 @@
     },
     "charts/swarmforge": {
       "component": "swarmforge"
+    },
+    "charts/falkordb": {
+      "component": "falkordb"
     }
   }
 }

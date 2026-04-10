@@ -25,6 +25,8 @@ jobs:
       outline--tag_name: ${{ steps.release.outputs['charts/outline--tag_name'] }}
       signatory--release_created: ${{ steps.release.outputs['charts/signatory--release_created'] }}
       signatory--tag_name: ${{ steps.release.outputs['charts/signatory--tag_name'] }}
+      falkordb--release_created: ${{ steps.release.outputs['charts/falkordb--release_created'] }}
+      falkordb--tag_name: ${{ steps.release.outputs['charts/falkordb--tag_name'] }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
