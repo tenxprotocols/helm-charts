@@ -1,0 +1,13 @@
+---
+apiVersion: v2
+name: falkordb
+description: FalkorDB graph database (Redis-compatible)
+
+maintainers:
+  - name: tenxprotocols
+    email: software@tenx.inc
+    url: https://github.com/tenxprotocols
+
+type: application
+version: 0.1.0
+appVersion: "v4.4.1"

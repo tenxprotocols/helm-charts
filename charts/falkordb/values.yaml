@@ -1,0 +1,60 @@
+---
+image:
+  repository: falkordb/falkordb
+  tag: v4.4.1
+  pullPolicy: IfNotPresent
+
+auth:
+  # -- Enable password authentication
+  enabled: false
+  # -- Inline password. Ignored when existingSecret is set.
+  password: ""
+  # -- Name of an existing Secret containing key "password"
+  existingSecret: ""
+
+service:
+  type: ClusterIP
+  port: 6380
+
+storage:
+  # -- Set to "" to use emptyDir (ephemeral)
+  size: 2Gi
+  className: ""
+  accessMode: ReadWriteOnce
+
+resources: {}
+  # limits:
+  #   cpu: 250m
+  #   memory: 256Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+livenessProbe:
+  exec:
+    command:
+      - redis-cli
+      - ping
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+  exec:
+    command:
+      - redis-cli
+      - ping
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
