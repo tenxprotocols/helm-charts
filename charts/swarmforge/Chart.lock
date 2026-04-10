@@ -5,5 +5,8 @@ dependencies:
 - name: valkey
   repository: oci://ghcr.io/tenxprotocols/helm-charts
   version: 0.2.0
-digest: sha256:ed33f98d8482f87a974f122dd8162f0a96ad2cf85351de7eeb5deefd7dba1b9d
-generated: "2026-03-27T18:04:20.362963-07:00"
+- name: falkordb
+  repository: oci://ghcr.io/tenxprotocols/helm-charts
+  version: 0.2.0
+digest: sha256:783df3d5bcf23830de634904815ee46d9f0d95f64f393b8e0f8e76eb4d78fc00
+generated: "2026-04-09T18:27:22.619595-07:00"
