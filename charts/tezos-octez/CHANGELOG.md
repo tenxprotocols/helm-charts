@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.4](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.3...tezos-octez-v2.1.4) (2026-04-30)
+
+
+### Bug Fixes
+
+* **tezos-octez:** add metrics address flag to baker deployment ([3e30b91](https://github.com/tenxprotocols/helm-charts/commit/3e30b911b04cf6f51b340de9f77b3a809c168f8c))
+
 ## [2.1.3](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.2...tezos-octez-v2.1.3) (2026-03-18)
 
 
