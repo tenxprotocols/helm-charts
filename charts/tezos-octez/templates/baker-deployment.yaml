@@ -18,11 +18,6 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/keys: {{ include (print $.Template.BasePath "/client-keys-secret.yaml") . | sha256sum }}
-        {{- if .Values.baker.metrics.enabled }}
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "{{ .Values.baker.metrics.port }}"
-        prometheus.io/path: "/metrics"
-        {{- end }}
         {{- with .Values.baker.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -75,9 +70,6 @@ spec:
                 > "${CLIENT_DIR}/per_block_votes.json"
               exec octez-baker -E "${NODE_RPC_URL}" -d "${CLIENT_DIR}" \
                 run remotely \
-                {{- if .Values.baker.metrics.enabled }}
-                --metrics-addr "0.0.0.0:{{ .Values.baker.metrics.port }}" \
-                {{- end }}
                 {{- if .Values.dal.enabled }}
                 --dal-node "http://{{ include "tezos-octez.dalFullname" . }}:{{ .Values.dal.rpc.port }}" \
                 {{- else if .Values.dal.externalEndpoint }}
@@ -87,12 +79,6 @@ spec:
                 {{- end }}
                 --votefile "${CLIENT_DIR}/per_block_votes.json" \
                 ${BAKER_KEY_ALIAS}{{- if .Values.baker.consensusKey }} consensus_key{{- end }}{{- if .Values.baker.companionKey }} companion_key{{- end }}
-          {{- if .Values.baker.metrics.enabled }}
-          ports:
-            - name: metrics
-              containerPort: {{ .Values.baker.metrics.port }}
-              protocol: TCP
-          {{- end }}
           {{- with .Values.baker.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
