@@ -8,5 +8,5 @@ maintainers:
     url: https://github.com/tenxprotocols
 
 type: application
-version: 2.1.4
+version: 2.1.5
 appVersion: "octez-v24.2"
