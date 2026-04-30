@@ -75,6 +75,9 @@ spec:
                 > "${CLIENT_DIR}/per_block_votes.json"
               exec octez-baker -E "${NODE_RPC_URL}" -d "${CLIENT_DIR}" \
                 run remotely \
+                {{- if .Values.baker.metrics.enabled }}
+                --metrics-addr "0.0.0.0:{{ .Values.baker.metrics.port }}" \
+                {{- end }}
                 {{- if .Values.dal.enabled }}
                 --dal-node "http://{{ include "tezos-octez.dalFullname" . }}:{{ .Values.dal.rpc.port }}" \
                 {{- else if .Values.dal.externalEndpoint }}
