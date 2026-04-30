@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.5](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.4...tezos-octez-v2.1.5) (2026-04-30)
+
+
+### Bug Fixes
+
+* **tezos-octez:** remove dead baker metrics plumbing ([0256981](https://github.com/tenxprotocols/helm-charts/commit/02569815f7f7279c49aa5cebfe3d048d6bf5eb05))
+
 ## [2.1.4](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.3...tezos-octez-v2.1.4) (2026-04-30)
 
 
