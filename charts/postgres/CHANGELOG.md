@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/tenxprotocols/helm-charts/compare/postgres-v0.2.0...postgres-v0.2.1) (2026-05-01)
+
+
+### Bug Fixes
+
+* **postgres:** add explicit default values to statefulset spec ([876b420](https://github.com/tenxprotocols/helm-charts/commit/876b420c0f1e57f6f9313a21985d1b76b59ba11a))
+
 ## [0.2.0](https://github.com/tenxprotocols/helm-charts/compare/postgres-v0.1.0...postgres-v0.2.0) (2026-03-28)
 
 
