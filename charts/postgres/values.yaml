@@ -38,6 +38,8 @@ livenessProbe:
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
 
 readinessProbe:
   exec:
@@ -48,6 +50,8 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
   timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
 
 nameOverride: ""
 fullnameOverride: ""
