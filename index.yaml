@@ -44,6 +44,20 @@ entries:
   postgres:
   - apiVersion: v2
     appVersion: "17"
+    created: "2026-05-01T18:39:22.403576311Z"
+    description: PostgreSQL StatefulSet with support for custom images (e.g. pgvector)
+    digest: c944d3f6ecd36426295f1a8f77ec1e3295ba2a990e8f481d91d9384a195aeed7
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: postgres
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/postgres-0.2.1/postgres-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
+    appVersion: "17"
     created: "2026-03-28T00:31:35.121524495Z"
     description: PostgreSQL StatefulSet with support for custom images (e.g. pgvector)
     digest: 129587efad5fd28f8636aa7a61f504b706ebc89f35606af8432bfd3eb1ab53c0
@@ -421,4 +435,4 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/valkey-0.2.0/valkey-0.2.0.tgz
     version: 0.2.0
-generated: "2026-04-30T04:03:43.86478139Z"
+generated: "2026-05-01T18:39:22.403656922Z"
