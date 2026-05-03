@@ -1,5 +1,20 @@
 apiVersion: v1
 entries:
+  chartdb:
+  - apiVersion: v2
+    appVersion: 1.20.1
+    created: "2026-05-03T21:03:19.253971758Z"
+    description: A Helm chart for ChartDB — open-source database diagram editor
+    digest: 71eb6c03e88e97aec7ddad3c4ce5a101431f1acd12d0ccac3b2811b6ebb9504b
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: chartdb
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/chartdb-1.0.0/chartdb-1.0.0.tgz
+    version: 1.0.0
   dns-exporter:
   - apiVersion: v2
     appVersion: v1.2.0-beta2
@@ -435,4 +450,4 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/valkey-0.2.0/valkey-0.2.0.tgz
     version: 0.2.0
-generated: "2026-05-01T18:39:22.403656922Z"
+generated: "2026-05-03T21:03:19.254032331Z"
