@@ -3,6 +3,9 @@
   "separate-pull-requests": true,
   "include-component-in-tag": true,
   "packages": {
+    "charts/chartdb": {
+      "component": "chartdb"
+    },
     "charts/dns-exporter": {
       "component": "dns-exporter"
     },
