@@ -1,0 +1,9 @@
+---
+# Values for chart-testing (ct lint / ct install).
+# Exercises the ai block with a fake key so AI env wiring is rendered.
+
+ai:
+  enabled: true
+  openai:
+    apiKey: sk-ct-fake-key-for-rendering-only
+  disableAnalytics: true

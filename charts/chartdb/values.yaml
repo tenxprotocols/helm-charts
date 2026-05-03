@@ -1,0 +1,226 @@
+---
+# Default values for chartdb.
+
+# -- Global parameters shared across subcharts.
+global:
+  # -- Global image registry override.
+  imageRegistry: ""
+  # -- Global image pull secrets (merged with imagePullSecrets).
+  imagePullSecrets: []
+  # -- Global default StorageClass.
+  storageClass: ""
+
+# -- Override the chart name used in resource names.
+nameOverride: ""
+# -- Override the full release name used in resource names.
+fullnameOverride: ""
+
+# -- Labels added to all resources.
+commonLabels: {}
+# -- Annotations added to all resources.
+commonAnnotations: {}
+
+# -- Number of replicas (ignored when autoscaling is enabled).
+replicaCount: 1
+
+image:
+  # -- Container image registry and repository.
+  repository: ghcr.io/chartdb/chartdb
+  # -- Image pull policy.
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# -- Secrets for pulling images from private registries.
+imagePullSecrets: []
+
+serviceAccount:
+  # -- Whether to create a ServiceAccount.
+  create: true
+  # -- Automatically mount the ServiceAccount token.
+  automount: true
+  # -- Annotations to add to the ServiceAccount.
+  annotations: {}
+  # -- The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template.
+  name: ""
+
+# -- Annotations to add to the pod.
+podAnnotations: {}
+# -- Labels to add to the pod.
+podLabels: {}
+
+# -- Pod-level security context.
+podSecurityContext: {}
+  # fsGroup: 1000
+  # runAsUser: 1000
+  # runAsNonRoot: true
+
+# -- Container-level security context.
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #     - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# -- Override the container command.
+command: []
+# -- Override the container arguments.
+args: []
+
+# -- Priority class name for the pod.
+priorityClassName: ""
+
+# -- Init containers to add to the pod.
+initContainers: []
+
+service:
+  # -- Kubernetes Service type.
+  type: ClusterIP
+  # -- Primary service port (matches the container's nginx port).
+  port: 80
+  # -- Additional named ports.
+  additionalPorts: []
+
+ingress:
+  # -- Enable Ingress resource.
+  enabled: false
+  # -- Ingress class name.
+  className: ""
+  # -- Ingress annotations.
+  annotations: {}
+    # kubernetes.io/tls-acme: "true"
+  # -- Ingress host rules.
+  hosts:
+    - host: chartdb.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  # -- TLS configuration.
+  tls: []
+    # - secretName: chartdb-tls
+    #   hosts:
+    #     - chartdb.local
+
+httpRoute:
+  # -- Enable Gateway API HTTPRoute.
+  enabled: false
+  # -- HTTPRoute annotations.
+  annotations: {}
+  # -- Parent gateway references.
+  parentRefs:
+    - name: gateway
+      sectionName: http
+      # namespace: default
+  # -- Hostnames matching HTTP header.
+  hostnames:
+    - chartdb.local
+  # -- Routing rules.
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+# -- ChartDB-specific AI configuration.
+# When enabled, projects OpenAI / custom-endpoint env vars into the container.
+ai:
+  # -- Enable AI features. Requires ai.openai.apiKey or ai.openai.endpoint.
+  enabled: false
+  openai:
+    # -- OpenAI API key. Rendered into the chart's Secret. Mutually exclusive with endpoint.
+    apiKey: ""
+    # -- Existing Secret to source OPENAI_API_KEY from instead of apiKey.
+    existingSecret: ""
+    # -- Key within existingSecret that holds the API key.
+    existingSecretKey: OPENAI_API_KEY
+    # -- Custom OpenAI-compatible inference endpoint URL.
+    endpoint: ""
+  # -- LLM model name (required when using a custom endpoint).
+  llmModel: ""
+  # -- Disable Fathom analytics tracking.
+  disableAnalytics: false
+
+# -- Sensitive data rendered into a Secret (as stringData).
+# Ignored when existingSecret is set.
+secretData: {}
+
+# -- Name of an existing Secret to use instead of creating one.
+# Note: ai.openai.existingSecret is independent and only sources the OpenAI key.
+existingSecret: ""
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+# -- Startup probe (useful for slow-starting containers).
+startupProbe: {}
+  # httpGet:
+  #   path: /
+  #   port: http
+  # failureThreshold: 30
+  # periodSeconds: 10
+
+# -- Resource requests and limits.
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  # -- Enable Horizontal Pod Autoscaler.
+  enabled: false
+  # -- Minimum replicas.
+  minReplicas: 1
+  # -- Maximum replicas.
+  maxReplicas: 100
+  # -- Target CPU utilization percentage.
+  targetCPUUtilizationPercentage: 80
+  # -- Target memory utilization percentage (uncomment to enable).
+  # targetMemoryUtilizationPercentage: 80
+
+# -- Additional volumes on the pod.
+volumes: []
+# -- Additional volume mounts on the container.
+volumeMounts: []
+
+# -- Extra environment variables for the container.
+extraEnvVars: []
+  # - name: FOO
+  #   value: bar
+# -- ConfigMap name containing extra environment variables.
+extraEnvVarsCM: ""
+# -- Secret name containing extra environment variables.
+extraEnvVarsSecret: ""
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# -- Topology spread constraints for pod scheduling.
+topologySpreadConstraints: []
+
+pdb:
+  # -- Enable PodDisruptionBudget.
+  enabled: false
+  # -- Minimum available pods (number or percentage).
+  minAvailable: ""
+  # -- Maximum unavailable pods (number or percentage).
+  maxUnavailable: ""
+
+networkPolicy:
+  # -- Enable NetworkPolicy.
+  enabled: false
+  # -- Ingress rules (empty = deny all; [{}] = allow all).
+  ingress: []
+  # -- Egress rules (empty = deny all; [{}] = allow all).
+  egress: []

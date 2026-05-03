@@ -1,0 +1,159 @@
+{{/*
+NOTE: To convert to a StatefulSet:
+  1. Change kind to StatefulSet
+  2. Add spec.serviceName referencing a headless Service
+  3. Replace spec.template.spec.volumes with spec.volumeClaimTemplates
+  4. Create a headless Service (clusterIP: None) for stable DNS
+*/}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chartdb.fullname" . }}
+  labels:
+    {{- include "chartdb.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "chartdb.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- $podAnnotations := .Values.podAnnotations | default dict }}
+      {{- $renderAiKey := and .Values.ai.enabled .Values.ai.openai.apiKey (not .Values.ai.openai.existingSecret) -}}
+      {{- $renderSecretData := and (not .Values.existingSecret) .Values.secretData -}}
+      {{- if or $renderAiKey $renderSecretData }}
+        {{- $_ := set $podAnnotations "checksum/secret" (include (print $.Template.BasePath "/secret.yaml") . | sha256sum) }}
+      {{- end }}
+      {{- with $podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "chartdb.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "chartdb.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "chartdb.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "chartdb.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- $emitAiEnv := and .Values.ai.enabled (or .Values.ai.openai.apiKey .Values.ai.openai.existingSecret .Values.ai.openai.endpoint .Values.ai.llmModel .Values.ai.disableAnalytics) -}}
+          {{- if or $emitAiEnv .Values.extraEnvVars }}
+          env:
+            {{- if $emitAiEnv }}
+            {{- if or .Values.ai.openai.apiKey .Values.ai.openai.existingSecret }}
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "chartdb.aiSecretName" . }}
+                  key: {{ .Values.ai.openai.existingSecretKey | quote }}
+            {{- end }}
+            {{- with .Values.ai.openai.endpoint }}
+            - name: OPENAI_API_ENDPOINT
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.ai.llmModel }}
+            - name: LLM_MODEL_NAME
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if .Values.ai.disableAnalytics }}
+            - name: DISABLE_ANALYTICS
+              value: "true"
+            {{- end }}
+            {{- end }}
+            {{- with .Values.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- if or .Values.extraEnvVarsCM .Values.extraEnvVarsSecret }}
+          envFrom:
+            {{- with .Values.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ . }}
+            {{- end }}
+            {{- with .Values.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ . }}
+            {{- end }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            {{- range .Values.service.additionalPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort | default .port }}
+              protocol: {{ .protocol | default "TCP" }}
+            {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
