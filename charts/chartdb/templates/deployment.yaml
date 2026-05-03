@@ -25,10 +25,9 @@ spec:
   template:
     metadata:
       {{- $podAnnotations := .Values.podAnnotations | default dict }}
-      {{- if and (not .Values.existingConfigMap) .Values.config }}
-        {{- $_ := set $podAnnotations "checksum/config" (include (print $.Template.BasePath "/configmap.yaml") . | sha256sum) }}
-      {{- end }}
-      {{- if and (not .Values.existingSecret) .Values.secretData }}
+      {{- $renderAiKey := and .Values.ai.enabled .Values.ai.openai.apiKey (not .Values.ai.openai.existingSecret) -}}
+      {{- $renderSecretData := and (not .Values.existingSecret) .Values.secretData -}}
+      {{- if or $renderAiKey $renderSecretData }}
         {{- $_ := set $podAnnotations "checksum/secret" (include (print $.Template.BasePath "/secret.yaml") . | sha256sum) }}
       {{- end }}
       {{- with $podAnnotations }}
@@ -70,15 +69,16 @@ spec:
           args:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if or .Values.ai.enabled .Values.extraEnvVars }}
+          {{- $emitAiEnv := and .Values.ai.enabled (or .Values.ai.openai.apiKey .Values.ai.openai.existingSecret .Values.ai.openai.endpoint .Values.ai.llmModel .Values.ai.disableAnalytics) -}}
+          {{- if or $emitAiEnv .Values.extraEnvVars }}
           env:
-            {{- if .Values.ai.enabled }}
+            {{- if $emitAiEnv }}
             {{- if or .Values.ai.openai.apiKey .Values.ai.openai.existingSecret }}
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ include "chartdb.aiSecretName" . }}
-                  key: {{ default "OPENAI_API_KEY" .Values.ai.openai.existingSecretKey | quote }}
+                  key: {{ .Values.ai.openai.existingSecretKey | quote }}
             {{- end }}
             {{- with .Values.ai.openai.endpoint }}
             - name: OPENAI_API_ENDPOINT
