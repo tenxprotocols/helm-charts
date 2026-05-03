@@ -8,5 +8,6 @@
   "charts/postgres": "0.2.1",
   "charts/valkey": "0.2.0",
   "charts/swarmforge": "0.4.0",
-  "charts/falkordb": "0.2.0"
+  "charts/falkordb": "0.2.0",
+  "charts/chartdb": "1.0.0"
 }
