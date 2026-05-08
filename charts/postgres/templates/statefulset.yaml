@@ -38,11 +38,7 @@ spec:
       terminationGracePeriodSeconds: 30
       {{- if .Values.tls.enabled }}
       securityContext:
-        fsGroup: 999
-        fsGroupChangePolicy: OnRootMismatch
-        {{- with .Values.podSecurityContext }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- mergeOverwrite (deepCopy .Values.podSecurityContext) (dict "fsGroup" 999 "fsGroupChangePolicy" "OnRootMismatch") | toYaml | nindent 8 }}
       {{- else }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}

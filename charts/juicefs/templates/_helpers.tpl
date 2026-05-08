@@ -176,3 +176,14 @@ URL at pod-start time.
   {{- end -}}
 {{- end -}}
 {{- end }}
+
+{{/*
+Validate that sslmode matches the postgres subchart's TLS setting.
+postgres.tls.enabled=true with sslmode=disable would silently use unencrypted
+connections, defeating the TLS configuration.
+*/}}
+{{- define "juicefs.validateSslmode" -}}
+{{- if and .Values.postgres.enabled .Values.postgres.tls.enabled (eq .Values.metadata.postgres.sslmode "disable") -}}
+  {{- fail "juicefs: postgres.tls.enabled=true requires metadata.postgres.sslmode != 'disable'. Set sslmode to 'require' (encrypted, no cert verification) or 'verify-full' (with PGSSLROOTCERT configured via extraEnv)." -}}
+{{- end -}}
+{{- end }}

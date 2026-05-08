@@ -80,7 +80,10 @@ metadata:
       # -- Secret name. Defaults to the postgres subchart secret name when blank.
       name: ""
       key: password
-    # -- libpq sslmode. Set to "require"/"verify-full" when postgres TLS is enabled.
+    # -- libpq sslmode. When postgres.tls.enabled=true, set to "require" (encrypted
+    # connection without certificate verification) or "verify-full" (full mTLS-style
+    # verification, requires a CA cert wired in via extraEnv/extraVolumes).
+    # The chart fails at render time if postgres.tls.enabled=true and sslmode="disable".
     # NOTE: the password used in the connection URL must be URL-safe (avoid : @ / ? #).
     sslmode: disable
 
