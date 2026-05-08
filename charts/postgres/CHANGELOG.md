@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/tenxprotocols/helm-charts/compare/postgres-v0.2.1...postgres-v0.3.0) (2026-05-08)
+
+
+### Features
+
+* **postgres:** add TLS support with cert-manager integration ([bbf550e](https://github.com/tenxprotocols/helm-charts/commit/bbf550ee39a761d29855bbb935624f1bcc797020))
+
+
+### Bug Fixes
+
+* **charts:** address final-review feedback ([18f4e61](https://github.com/tenxprotocols/helm-charts/commit/18f4e618eaf95711962baaf6d79a366c609acbe7))
+
 ## [0.2.1](https://github.com/tenxprotocols/helm-charts/compare/postgres-v0.2.0...postgres-v0.2.1) (2026-05-01)
 
 
