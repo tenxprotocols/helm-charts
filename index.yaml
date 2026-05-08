@@ -56,7 +56,41 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/http-exporter-6.0.0/http-exporter-6.0.0.tgz
     version: 6.0.0
+  juicefs:
+  - apiVersion: v2
+    appVersion: 1.3.1
+    created: "2026-05-08T21:50:38.604961511Z"
+    dependencies:
+    - condition: postgres.enabled
+      name: postgres
+      repository: file://../postgres
+      version: 0.3.0
+    description: JuiceFS S3 Gateway with PostgreSQL metadata engine
+    digest: d17a00f2c605a6f2746d76dd5a77b6f2dd233330f944b19e262c869b2e03e864
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: juicefs
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/juicefs-0.1.0/juicefs-0.1.0.tgz
+    version: 0.1.0
   postgres:
+  - apiVersion: v2
+    appVersion: "17"
+    created: "2026-05-08T21:50:38.758557873Z"
+    description: PostgreSQL StatefulSet with support for custom images (e.g. pgvector)
+    digest: c75295add26204a193d3eed1e377ac9722744f07cf16085fa4389f55f25c4566
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: postgres
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/postgres-0.3.0/postgres-0.3.0.tgz
+    version: 0.3.0
   - apiVersion: v2
     appVersion: "17"
     created: "2026-05-01T18:39:22.403576311Z"
@@ -450,4 +484,4 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/valkey-0.2.0/valkey-0.2.0.tgz
     version: 0.2.0
-generated: "2026-05-03T21:03:19.254032331Z"
+generated: "2026-05-08T21:50:38.758613181Z"
