@@ -15,6 +15,9 @@
     "charts/http-exporter": {
       "component": "http-exporter"
     },
+    "charts/juicefs": {
+      "component": "juicefs"
+    },
     "charts/outline": {
       "component": "outline"
     },

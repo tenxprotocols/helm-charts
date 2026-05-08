@@ -1,0 +1,166 @@
+{{- include "juicefs.validatePostgresPassword" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "juicefs.fullname" . }}
+  labels:
+    {{- include "juicefs.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "juicefs.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "juicefs.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "juicefs.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "juicefs.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: format
+          image: {{ include "juicefs.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command: ["sh", "-ec"]
+          args:
+            - |
+              juicefs format \
+                "postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}?sslmode=${PG_SSLMODE}" \
+                "${JFS_NAME}" \
+                --storage="${OS_TYPE}" \
+                --bucket="${OS_BUCKET}" \
+                --access-key="${OS_ACCESS_KEY}" \
+                --secret-key="${OS_SECRET_KEY}"{{ with .Values.juicefs.formatOptions }} \
+                {{ . }}{{ end }}
+          env:
+            - name: JFS_NAME
+              value: {{ .Values.juicefs.name | quote }}
+            - name: PG_HOST
+              value: {{ include "juicefs.postgres.host" . | quote }}
+            - name: PG_PORT
+              value: {{ .Values.metadata.postgres.port | quote }}
+            - name: PG_DATABASE
+              value: {{ include "juicefs.postgres.database" . | quote }}
+            - name: PG_USER
+              value: {{ include "juicefs.postgres.username" . | quote }}
+            - name: PG_SSLMODE
+              value: {{ .Values.metadata.postgres.sslmode | quote }}
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "juicefs.postgres.passwordSecret.name" . }}
+                  key: {{ .Values.metadata.postgres.passwordSecret.key }}
+            - name: OS_TYPE
+              value: {{ .Values.objectStorage.type | quote }}
+            - name: OS_BUCKET
+              value: {{ required "juicefs: objectStorage.bucket is required" .Values.objectStorage.bucket | quote }}
+            - name: OS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "juicefs.objectStorage.secretName" . }}
+                  key: access-key
+            - name: OS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "juicefs.objectStorage.secretName" . }}
+                  key: secret-key
+      containers:
+        - name: gateway
+          image: {{ include "juicefs.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command: ["sh", "-ec"]
+          args:
+            - |
+              juicefs gateway \
+                "postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}?sslmode=${PG_SSLMODE}" \
+                "0.0.0.0:{{ .Values.service.port }}" \
+                --metrics="0.0.0.0:{{ .Values.service.metricsPort }}"{{ with .Values.juicefs.gatewayOptions }} \
+                {{ . }}{{ end }}
+          env:
+            - name: PG_HOST
+              value: {{ include "juicefs.postgres.host" . | quote }}
+            - name: PG_PORT
+              value: {{ .Values.metadata.postgres.port | quote }}
+            - name: PG_DATABASE
+              value: {{ include "juicefs.postgres.database" . | quote }}
+            - name: PG_USER
+              value: {{ include "juicefs.postgres.username" . | quote }}
+            - name: PG_SSLMODE
+              value: {{ .Values.metadata.postgres.sslmode | quote }}
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "juicefs.postgres.passwordSecret.name" . }}
+                  key: {{ .Values.metadata.postgres.passwordSecret.key }}
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "juicefs.gatewayAuth.secretName" . }}
+                  key: access-key
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "juicefs.gatewayAuth.secretName" . }}
+                  key: secret-key
+          ports:
+            - name: s3
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.service.metricsPort }}
+              protocol: TCP
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

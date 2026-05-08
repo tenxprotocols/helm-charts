@@ -1,0 +1,162 @@
+---
+# Default values for juicefs.
+
+global:
+  # -- Global image registry override.
+  imageRegistry: ""
+  # -- Global image pull secrets (merged with imagePullSecrets).
+  imagePullSecrets: []
+  # -- Global default StorageClass.
+  storageClass: ""
+
+# -- Override the chart name used in resource names.
+nameOverride: ""
+# -- Override the full release name used in resource names.
+fullnameOverride: ""
+
+# -- Labels added to all resources.
+commonLabels: {}
+# -- Annotations added to all resources.
+commonAnnotations: {}
+
+# -- Number of S3 Gateway replicas. The gateway is stateless from a pod
+# perspective (state lives in PG and R2), so >1 is safe for HA.
+replicaCount: 1
+
+image:
+  # -- juicedata/mount image. Has the juicefs CLI baked in.
+  repository: juicedata/mount
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is "ce-v" + chart appVersion.
+  tag: ""
+
+# -- Secrets for pulling images from private registries.
+imagePullSecrets: []
+
+juicefs:
+  # -- JuiceFS filesystem name (positional arg to `juicefs format`).
+  name: juicefs
+  # -- Extra args appended to `juicefs format` (space-separated string).
+  formatOptions: ""
+  # -- Extra args appended to `juicefs gateway` (space-separated string).
+  gatewayOptions: ""
+
+# Object storage backend (e.g. Cloudflare R2).
+# Consumed by both the format initContainer and the gateway container.
+objectStorage:
+  # -- juicefs --storage value. R2 uses "s3".
+  type: s3
+  # -- Bucket URL passed to juicefs as --bucket.
+  # For R2: https://<account>.r2.cloudflarestorage.com/<bucket-name>
+  bucket: ""
+  # -- Inline credentials. Ignored when existingSecret is set.
+  accessKey: ""
+  secretKey: ""
+  # -- Existing secret with object storage credentials.
+  # Must contain keys: access-key, secret-key
+  existingSecret: ""
+
+# S3 Gateway client credentials (MINIO_ROOT_USER / MINIO_ROOT_PASSWORD).
+# Kept SEPARATE from objectStorage so in-cluster apps don't get R2 creds.
+gatewayAuth:
+  # -- Inline credentials. Ignored when existingSecret is set.
+  accessKey: ""
+  secretKey: ""
+  # -- Existing secret with gateway auth credentials.
+  # Must contain keys: access-key, secret-key
+  existingSecret: ""
+
+# PostgreSQL metadata engine connection. Defaults derive from the postgres subchart.
+metadata:
+  postgres:
+    # -- Host. Defaults to <release>-postgres when blank and postgres.enabled.
+    host: ""
+    port: 5432
+    # -- Database. Defaults to .Values.postgres.auth.database when blank.
+    database: ""
+    # -- Username. Defaults to .Values.postgres.auth.username when blank.
+    username: ""
+    passwordSecret:
+      # -- Secret name. Defaults to the postgres subchart secret name when blank.
+      name: ""
+      key: password
+    # -- libpq sslmode. Set to "require"/"verify-full" when postgres TLS is enabled.
+    # NOTE: the password used in the connection URL must be URL-safe (avoid : @ / ? #).
+    sslmode: disable
+
+service:
+  # -- Kubernetes Service type.
+  type: ClusterIP
+  # -- S3 API port.
+  port: 9000
+  # -- Prometheus metrics port.
+  metricsPort: 9567
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs: []
+  hostnames: []
+  rules: []
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+resources: {}
+
+livenessProbe:
+  tcpSocket:
+    port: s3
+readinessProbe:
+  httpGet:
+    path: /minio/health/ready
+    port: s3
+startupProbe: {}
+
+pdb:
+  enabled: false
+  minAvailable: ""
+  maxUnavailable: ""
+
+networkPolicy:
+  enabled: false
+  ingress: []
+  egress: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []
+
+# Postgres subchart (existing chart at charts/postgres).
+postgres:
+  enabled: true
+  auth:
+    database: juicefs
+    username: juicefs
+    password: ""
+    existingSecret: ""
+  service:
+    # -- LoadBalancer so out-of-cluster sandboxes can reach the metadata engine.
+    type: LoadBalancer
+  storage:
+    size: 10Gi
+  tls:
+    enabled: false
+    existingSecret: ""
+    certManager:
+      enabled: false

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "juicefs.fullname" . }}-test-connection"
+  labels:
+    {{- include "juicefs.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args:
+        - '--spider'
+        - '{{ include "juicefs.fullname" . }}:{{ .Values.service.port }}/minio/health/ready'
+  restartPolicy: Never

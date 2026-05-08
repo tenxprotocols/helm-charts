@@ -1,0 +1,26 @@
+JuiceFS S3 Gateway is deploying. The format job runs as an initContainer on
+each pod start; first-time installs may take a moment to become Ready.
+
+S3 endpoint (in-cluster):
+  http://{{ include "juicefs.fullname" . }}.{{ .Release.Namespace }}.svc:{{ .Values.service.port }}
+
+Retrieve the gateway access/secret keys:
+{{- $gwSecret := include "juicefs.gatewayAuth.secretName" . }}
+{{- if .Values.gatewayAuth.existingSecret }}
+  Using existingSecret {{ .Values.gatewayAuth.existingSecret | quote }}.
+{{- end }}
+  kubectl --namespace {{ .Release.Namespace }} get secret {{ $gwSecret }} \
+    -o jsonpath='{.data.access-key}' | base64 -d
+  kubectl --namespace {{ .Release.Namespace }} get secret {{ $gwSecret }} \
+    -o jsonpath='{.data.secret-key}' | base64 -d
+
+{{- if and .Values.postgres.enabled (eq .Values.postgres.service.type "LoadBalancer") }}
+
+PostgreSQL (for sandbox `juicefs mount`):
+  PG_HOST=$(kubectl --namespace {{ .Release.Namespace }} get svc {{ .Release.Name }}-postgres \
+    -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  PG_USER={{ include "juicefs.postgres.username" . | quote }}
+  PG_PASSWORD=$(kubectl --namespace {{ .Release.Namespace }} get secret {{ include "juicefs.postgres.passwordSecret.name" . }} \
+    -o jsonpath='{.data.{{ .Values.metadata.postgres.passwordSecret.key }}}' | base64 -d)
+  echo "Connect: postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:5432/{{ include "juicefs.postgres.database" . }}"
+{{- end }}

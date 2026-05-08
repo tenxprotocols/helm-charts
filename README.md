@@ -8,6 +8,7 @@ A collection of Helm charts maintained by [TenX](https://github.com/tenxprotocol
 |-------|-------------|
 | [chartdb](charts/chartdb) | Open-source database diagram editor |
 | [http-exporter](charts/http-exporter) | A flexible OpenMetrics exporter for HTTP (RPC and REST) endpoints |
+| [juicefs](charts/juicefs) | JuiceFS S3 Gateway with PostgreSQL metadata engine |
 | [signatory](charts/signatory) | A Helm chart for Signatory - a Tezos Remote Signer |
 
 ## Usage
