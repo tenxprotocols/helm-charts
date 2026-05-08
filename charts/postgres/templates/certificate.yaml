@@ -1,0 +1,30 @@
+{{- if and .Values.tls.enabled .Values.tls.certManager.enabled -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "postgres.fullname" . }}-tls
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "postgres.fullname" . }}-tls
+  {{- with .Values.tls.certManager.duration }}
+  duration: {{ . }}
+  {{- end }}
+  {{- with .Values.tls.certManager.renewBefore }}
+  renewBefore: {{ . }}
+  {{- end }}
+  issuerRef:
+    name: {{ required "postgres: tls.certManager.issuerRef.name is required when certManager.enabled" .Values.tls.certManager.issuerRef.name }}
+    kind: {{ .Values.tls.certManager.issuerRef.kind | default "ClusterIssuer" }}
+    group: {{ .Values.tls.certManager.issuerRef.group | default "cert-manager.io" }}
+  dnsNames:
+    {{- if .Values.tls.certManager.dnsNames }}
+    {{- toYaml .Values.tls.certManager.dnsNames | nindent 4 }}
+    {{- else }}
+    {{- include "postgres.tlsDefaultDnsNames" . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.tls.certManager.ipAddresses }}
+  ipAddresses:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

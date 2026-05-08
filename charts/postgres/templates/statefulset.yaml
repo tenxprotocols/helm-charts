@@ -36,8 +36,17 @@ spec:
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
+      {{- if .Values.tls.enabled }}
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        {{- with .Values.podSecurityContext }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- else }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- end }}
       containers:
         - name: postgres
           {{- with .Values.securityContext }}
@@ -46,6 +55,21 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if or .Values.tls.enabled .Values.extraArgs }}
+          args:
+            - postgres
+            {{- if .Values.tls.enabled }}
+            - -c
+            - ssl=on
+            - -c
+            - ssl_cert_file=/etc/postgresql/tls/tls.crt
+            - -c
+            - ssl_key_file=/etc/postgresql/tls/tls.key
+            {{- end }}
+            {{- range .Values.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           ports:
@@ -79,6 +103,18 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+            {{- if .Values.tls.enabled }}
+            - name: tls
+              mountPath: /etc/postgresql/tls
+              readOnly: true
+            {{- end }}
+      {{- if .Values.tls.enabled }}
+      volumes:
+        - name: tls
+          secret:
+            secretName: {{ include "postgres.tlsSecretName" . }}
+            defaultMode: 0440
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

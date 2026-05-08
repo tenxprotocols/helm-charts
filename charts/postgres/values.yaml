@@ -63,3 +63,28 @@ securityContext: {}
 nodeSelector: {}
 tolerations: []
 affinity: {}
+
+# -- Extra args appended to the `postgres` command. Combined with TLS args when tls.enabled.
+extraArgs: []
+
+tls:
+  # -- Enable TLS for client connections.
+  enabled: false
+  # -- Use an existing kubernetes.io/tls Secret containing tls.crt, tls.key.
+  # Mutually exclusive with certManager.enabled.
+  existingSecret: ""
+  certManager:
+    # -- Issue the server certificate via cert-manager (renders a Certificate resource).
+    enabled: false
+    issuerRef:
+      name: ""
+      kind: ClusterIssuer
+      group: cert-manager.io
+    # -- Cert validity duration (e.g. 8760h). Empty defers to cert-manager default.
+    duration: ""
+    # -- Renew this long before expiry (e.g. 720h). Empty defers to cert-manager default.
+    renewBefore: ""
+    # -- DNS names on the cert. When empty, defaults to the four standard service DNS forms.
+    dnsNames: []
+    # -- Additional IP SANs (useful for known LoadBalancer IPs).
+    ipAddresses: []

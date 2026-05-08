@@ -40,3 +40,33 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- include "postgres.fullname" . }}
 {{- end }}
 {{- end }}
+
+{{/*
+Resolve the TLS Secret name. Fails when tls.enabled and neither / both of
+existingSecret and certManager.enabled are set.
+*/}}
+{{- define "postgres.tlsSecretName" -}}
+{{- if not .Values.tls.enabled -}}
+  {{- "" -}}
+{{- else if and .Values.tls.existingSecret .Values.tls.certManager.enabled -}}
+  {{- fail "postgres: set exactly one of tls.existingSecret or tls.certManager.enabled" -}}
+{{- else if .Values.tls.existingSecret -}}
+  {{- .Values.tls.existingSecret -}}
+{{- else if .Values.tls.certManager.enabled -}}
+  {{- printf "%s-tls" (include "postgres.fullname" .) -}}
+{{- else -}}
+  {{- fail "postgres: tls.enabled requires either tls.existingSecret or tls.certManager.enabled" -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Default DNS names for the cert-manager Certificate when tls.certManager.dnsNames is empty.
+*/}}
+{{- define "postgres.tlsDefaultDnsNames" -}}
+{{- $fullname := include "postgres.fullname" . -}}
+{{- $ns := .Release.Namespace -}}
+- {{ $fullname | quote }}
+- {{ printf "%s.%s" $fullname $ns | quote }}
+- {{ printf "%s.%s.svc" $fullname $ns | quote }}
+- {{ printf "%s.%s.svc.cluster.local" $fullname $ns | quote }}
+{{- end }}
