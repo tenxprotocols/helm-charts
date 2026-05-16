@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.0.0...tezos-octez-v3.0.1) (2026-05-16)
+
+
+### Bug Fixes
+
+* **tezos-octez:** set fsGroup on DAL statefulset for PVC writability ([4fc2adf](https://github.com/tenxprotocols/helm-charts/commit/4fc2adff52fa572603a03e87bcdb65f0bedbec90))
+
 ## [3.0.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.5...tezos-octez-v3.0.0) (2026-05-16)
 
 
