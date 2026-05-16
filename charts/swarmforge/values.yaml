@@ -153,6 +153,37 @@ env: {}
 # Existing secret with env vars to inject into all components via envFrom
 existingSecret: ""
 
+# KMS / KEK configuration for the secrets package (gateway + worker only).
+#
+# When `provider` is set, KMS_PROVIDER is injected into both containers and
+# the provider-specific config is applied:
+#
+#   - "local": the key referenced by `local.secretKey` in `existingSecret` is
+#     mounted as a file at `<local.mountDir>/<local.fileName>`, and
+#     KEK_LOCAL_PATH is set to that path. Suitable for dev.
+#   - "gcp": GCP_KMS_KEY_NAME is set from `gcp.keyName`. The pod must run as a
+#     ServiceAccount bound (via Workload Identity) to a GSA with
+#     `cloudkms.cryptoKeyEncrypterDecrypter` on that key — configure via
+#     `serviceAccount` below.
+#
+# Empty `provider` disables KMS env injection entirely.
+kms:
+  provider: ""
+  local:
+    secretKey: ""
+    mountDir: /var/run/swarmforge
+    fileName: kek.json
+  gcp:
+    keyName: ""
+
+# Optional ServiceAccount for the gateway + worker pods. Useful with
+# kms.provider=gcp + Workload Identity, or any other GCP-authenticated client.
+# When create=false and name is empty, the namespace `default` SA is used.
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+
 ingress:
   enabled: false
   className: ""

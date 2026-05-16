@@ -17,6 +17,10 @@ spec:
         {{- include "swarmforge.componentLabels" (dict "component" "worker" "context" .) | nindent 8 }}
     spec:
       {{- include "swarmforge.imagePullSecrets" . | nindent 6 }}
+      {{- $sa := include "swarmforge.appServiceAccountName" . }}
+      {{- if $sa }}
+      serviceAccountName: {{ $sa }}
+      {{- end }}
       containers:
         - name: worker
           image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
@@ -29,6 +33,7 @@ spec:
             {{- include "swarmforge.commonEnv" . | nindent 12 }}
             - name: HEALTH_PORT
               value: {{ .Values.worker.healthPort | quote }}
+            {{- include "swarmforge.kmsEnv" . | nindent 12 }}
             {{- range $key, $value := .Values.worker.env }}
             - name: {{ $key | quote }}
               value: {{ $value | quote }}
@@ -37,6 +42,11 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .Values.existingSecret }}
+          {{- end }}
+          {{- $kekMount := include "swarmforge.kekVolumeMount" . }}
+          {{- if $kekMount }}
+          volumeMounts:
+            {{- $kekMount | nindent 12 }}
           {{- end }}
           {{- with .Values.worker.livenessProbe }}
           livenessProbe:
@@ -50,4 +60,9 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+      {{- $kekVol := include "swarmforge.kekVolume" . }}
+      {{- if $kekVol }}
+      volumes:
+        {{- $kekVol | nindent 8 }}
+      {{- end }}
 {{- end }}

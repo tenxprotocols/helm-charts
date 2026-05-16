@@ -144,3 +144,60 @@ imagePullSecrets:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 {{- end }}
+
+{{/*
+ServiceAccount name to use on the gateway + worker pods. Empty string when
+neither serviceAccount.create nor serviceAccount.name is set (pod uses the
+namespace `default`).
+*/}}
+{{- define "swarmforge.appServiceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (printf "%s-app" .Values.global.namePrefix) .Values.serviceAccount.name }}
+{{- else }}
+{{- .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+KMS env vars injected into gateway + worker. Emits nothing when
+kms.provider is unset, preserving the pre-0.5 behavior.
+*/}}
+{{- define "swarmforge.kmsEnv" -}}
+{{- if .Values.kms.provider }}
+- name: KMS_PROVIDER
+  value: {{ .Values.kms.provider | quote }}
+{{- if eq .Values.kms.provider "local" }}
+- name: KEK_LOCAL_PATH
+  value: {{ printf "%s/%s" .Values.kms.local.mountDir .Values.kms.local.fileName | quote }}
+{{- else if eq .Values.kms.provider "gcp" }}
+- name: GCP_KMS_KEY_NAME
+  value: {{ .Values.kms.gcp.keyName | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Volume entry for the local KEK file. Used only when kms.provider=local.
+Sources the KEK JSON from `existingSecret` under `kms.local.secretKey`.
+*/}}
+{{- define "swarmforge.kekVolume" -}}
+{{- if and (eq .Values.kms.provider "local") .Values.existingSecret .Values.kms.local.secretKey }}
+- name: kek
+  secret:
+    secretName: {{ .Values.existingSecret }}
+    items:
+      - key: {{ .Values.kms.local.secretKey | quote }}
+        path: {{ .Values.kms.local.fileName | quote }}
+{{- end }}
+{{- end }}
+
+{{/*
+Volume mount for the local KEK file. Used only when kms.provider=local.
+*/}}
+{{- define "swarmforge.kekVolumeMount" -}}
+{{- if and (eq .Values.kms.provider "local") .Values.existingSecret .Values.kms.local.secretKey }}
+- name: kek
+  mountPath: {{ .Values.kms.local.mountDir | quote }}
+  readOnly: true
+{{- end }}
+{{- end }}
