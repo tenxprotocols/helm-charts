@@ -39,6 +39,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "tezos-octez.serviceAccountName" . }}
+      securityContext:
+        fsGroup: 1000
       {{- if $allProfiles }}
       initContainers:
         - name: wait-for-node
