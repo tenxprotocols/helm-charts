@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.5...tezos-octez-v3.0.0) (2026-05-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **tezos-octez:** appVersion bumped from octez-v24.2 to octez-v24.4. Users who don't override `node.image.tag` / `baker.image.tag` / `dal.image.tag` will see the default image tag change. Pods using chart defaults will roll on next reconcile.
+
+### Features
+
+* **tezos-octez:** support inline network config for community testnets ([687b978](https://github.com/tenxprotocols/helm-charts/commit/687b9787cb9f0cdbfb126219f3d953e23772f6ec))
+
 ## [2.1.5](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v2.1.4...tezos-octez-v2.1.5) (2026-04-30)
 
 
