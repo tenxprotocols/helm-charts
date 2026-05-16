@@ -9,7 +9,7 @@ data:
   config.json: |
     {
       "data-dir": "/var/tezos/node/data",
-      "network": "{{ .Values.global.network }}",
+      "network": {{ if .Values.global.networkConfig }}{{ toJson .Values.global.networkConfig }}{{ else }}{{ .Values.global.network | quote }}{{ end }},
       "rpc": {
         "listen-addrs": ["0.0.0.0:{{ .Values.node.rpc.port }}"],
         "acl": [

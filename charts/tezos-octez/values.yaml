@@ -3,10 +3,35 @@
 # Declare variables to be passed into your templates.
 
 global:
-  # Tezos network name (e.g. mainnet, ghostnet)
+  # Short, label-safe network name used for K8s labels, fullnames, log
+  # filters, and the snapshot URL path. Must be one of the built-in Octez
+  # network aliases (sandbox, mainnet, ghostnet, shadownet) UNLESS
+  # `networkConfig` is set below, in which case this can be any label-safe
+  # identifier (e.g. "bakingnet", "ushuaianet") and `networkConfig` provides
+  # the actual network parameters.
   network: mainnet
-  # Tezos protocol (used for baker binary selection)
-  protocol: PtTallinn
+
+  # Inline network configuration for non-built-in networks. When non-empty,
+  # this YAML object is rendered as a JSON object into the node config.json
+  # "network" field. Use this for community testnets (bakingnet, ushuaianet,
+  # weeklynet, etc.) by copying the relevant entry from
+  # https://teztnets.com/teztnets.json. Quote ISO-8601 timestamps as strings
+  # so YAML doesn't decode them as datetime types.
+  #
+  # Required fields: chain_name, sandboxed_chain_name, genesis.
+  # Optional fields per the Octez blockchain_network encoding.
+  #
+  # Example:
+  # networkConfig:
+  #   chain_name: TEZOS_BAKINGNET_2026-04-08T20:00:00Z
+  #   sandboxed_chain_name: SANDBOXED_TEZOS
+  #   genesis:
+  #     block: BMKHqWxBQ3WD2H3D5fyjxbnfxEX9FdqXvxPmXfhwjCFmjG6Wuxh
+  #     protocol: Ps9mPmXaRzmzk35gbAYNCAw6UXdE2qoABTHbN2oEEc1qM7CwT9P
+  #     timestamp: "2026-04-08T20:00:00Z"
+  #   default_bootstrap_peers:
+  #     - bakingnet.teztnets.com
+  networkConfig: {}
 
 signatory:
   # Signatory remote signer endpoint, shared by baker and DAL node
