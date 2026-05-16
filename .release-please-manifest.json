@@ -8,7 +8,7 @@
   "charts/tezos-octez": "3.0.1",
   "charts/postgres": "0.3.0",
   "charts/valkey": "0.2.0",
-  "charts/swarmforge": "0.4.0",
+  "charts/swarmforge": "0.5.0",
   "charts/falkordb": "0.2.0",
   "charts/chartdb": "1.0.0"
 }
