@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.4.0...swarmforge-v0.5.0) (2026-05-16)
+
+
+### Features
+
+* **swarmforge:** add KMS/KEK support and ServiceAccount ([950a252](https://github.com/tenxprotocols/helm-charts/commit/950a252fa94bdc7fac815b0fe852bea0f9a4e6a8))
+
 ## [0.4.0](https://github.com/tenxprotocols/helm-charts/compare/swarmforge-v0.3.1...swarmforge-v0.4.0) (2026-04-10)
 
 
