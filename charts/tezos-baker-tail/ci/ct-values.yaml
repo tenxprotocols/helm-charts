@@ -1,0 +1,13 @@
+---
+# Minimal values for chart-testing (ct install).
+# Provides the three required `tail.*` fields so the manifest renders
+# and the pod can start inside a kind cluster (it will fail to reach a
+# real octez node, but rendering and basic startup are what ct checks).
+
+tail:
+  network: ct
+  nodeRpcUrl: http://localhost:8732
+  delegatePkh: tz1ikovWRwNJ7KHUox3rgNB1LCPhUsf5SGFN
+
+serviceMonitor:
+  enabled: false

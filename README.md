@@ -10,6 +10,7 @@ A collection of Helm charts maintained by [TenX](https://github.com/tenxprotocol
 | [http-exporter](charts/http-exporter) | A flexible OpenMetrics exporter for HTTP (RPC and REST) endpoints |
 | [juicefs](charts/juicefs) | JuiceFS S3 Gateway with PostgreSQL metadata engine |
 | [signatory](charts/signatory) | A Helm chart for Signatory - a Tezos Remote Signer |
+| [tezos-baker-tail](charts/tezos-baker-tail) | Live per-level Tezos baker classifier (JSON event stream + Prometheus metrics) |
 
 ## Usage
 

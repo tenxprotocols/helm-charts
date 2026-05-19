@@ -24,6 +24,9 @@
     "charts/signatory": {
       "component": "signatory"
     },
+    "charts/tezos-baker-tail": {
+      "component": "tezos-baker-tail"
+    },
     "charts/tezos-octez": {
       "component": "tezos-octez"
     },
