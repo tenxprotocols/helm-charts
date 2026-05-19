@@ -1,0 +1,163 @@
+---
+# Default values for tezos-baker-tail.
+
+# -- Global parameters shared across subcharts.
+global:
+  # -- Global image registry override.
+  imageRegistry: ""
+  # -- Global image pull secrets (merged with imagePullSecrets).
+  imagePullSecrets: []
+
+# -- Override the chart name used in resource names.
+nameOverride: ""
+# -- Override the full release name used in resource names.
+fullnameOverride: ""
+
+# -- Labels added to all resources.
+commonLabels: {}
+# -- Annotations added to all resources.
+commonAnnotations: {}
+
+# -- Number of replicas. Keep at 1: each replica classifies levels
+# independently, so >1 replica double-emits events.
+replicaCount: 1
+
+image:
+  # -- Container image registry and repository.
+  repository: ghcr.io/tenxprotocols/tezos-baker-tail
+  # -- Image pull policy.
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# -- Secrets for pulling images from private registries.
+imagePullSecrets: []
+
+serviceAccount:
+  # -- Whether to create a ServiceAccount.
+  create: true
+  # -- Automatically mount the ServiceAccount token.
+  automount: false
+  # -- Annotations to add to the ServiceAccount.
+  annotations: {}
+  # -- The name of the ServiceAccount to use.
+  name: ""
+
+# -- Annotations to add to the pod.
+podAnnotations: {}
+# -- Labels to add to the pod.
+podLabels: {}
+
+# -- Pod-level security context.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container-level security context.
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# -- Override the container command.
+command: []
+# -- Override the container arguments.
+args: []
+
+# -- Priority class name for the pod.
+priorityClassName: ""
+
+# -- Init containers to add to the pod.
+initContainers: []
+
+# -- Subscriber configuration. The first three are required per deployment.
+tail:
+  # -- Network label used in metrics + emitted events (e.g. shadownet, mainnet).
+  network: ""
+  # -- URL of the local octez node's RPC, used for /monitor/heads and block reads.
+  nodeRpcUrl: ""
+  # -- Public-key hash of the delegate being watched.
+  delegatePkh: ""
+  # -- Levels of history kept for re-org detection.
+  reorgBufferSize: 64
+  # -- Initial backoff after a head-stream disconnect.
+  reconnectInitialDelay: 1s
+  # -- Backoff cap for head-stream reconnects.
+  reconnectMaxDelay: 30s
+  # -- Subscriber's own slog level (DEBUG / INFO / WARN / ERROR).
+  logLevel: INFO
+
+service:
+  # -- Kubernetes Service type.
+  type: ClusterIP
+  # -- Metrics + healthz port (matches the binary's METRICS_LISTEN default).
+  port: 9100
+
+serviceMonitor:
+  # -- Enable Prometheus ServiceMonitor.
+  enabled: true
+  # -- Additional labels for ServiceMonitor discovery.
+  additionalLabels: {}
+  # -- Scrape interval.
+  interval: 30s
+  # -- Scrape timeout.
+  scrapeTimeout: 10s
+  # -- Port name to scrape (must match service port name).
+  port: metrics
+  # -- Metrics endpoint path.
+  path: /metrics
+  # -- MetricRelabelConfigs to apply after scraping.
+  metricRelabelings: []
+  # -- RelabelConfigs to apply before scraping.
+  relabelings: []
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: metrics
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 5
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: metrics
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+# -- Startup probe (useful for slow-starting containers).
+startupProbe: {}
+
+# -- Resource requests and limits.
+resources:
+  requests:
+    cpu: 25m
+    memory: 32Mi
+  limits:
+    memory: 128Mi
+
+# -- Additional volumes on the pod.
+volumes: []
+# -- Additional volume mounts on the container.
+volumeMounts: []
+
+# -- Extra environment variables for the container (appended after the
+# tail.* env block).
+extraEnvVars: []
+# -- ConfigMap name containing extra environment variables.
+extraEnvVarsCM: ""
+# -- Secret name containing extra environment variables.
+extraEnvVarsSecret: ""
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# -- Topology spread constraints for pod scheduling.
+topologySpreadConstraints: []

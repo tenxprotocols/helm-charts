@@ -1,0 +1,20 @@
+tezos-baker-tail is now watching:
+  network:  {{ .Values.tail.network }}
+  delegate: {{ .Values.tail.delegatePkh }}
+  node RPC: {{ .Values.tail.nodeRpcUrl }}
+
+View live classifications (one JSON line per level):
+
+  kubectl --namespace {{ .Release.Namespace }} logs -f \
+    -l app.kubernetes.io/name={{ include "tezos-baker-tail.name" . }},app.kubernetes.io/instance={{ .Release.Name }}
+
+Port-forward the Prometheus metrics endpoint:
+
+  kubectl --namespace {{ .Release.Namespace }} port-forward \
+    svc/{{ include "tezos-baker-tail.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+  curl http://127.0.0.1:{{ .Values.service.port }}/metrics
+
+{{- if .Values.serviceMonitor.enabled }}
+
+A Prometheus ServiceMonitor was created and will scrape /metrics every {{ .Values.serviceMonitor.interval }}.
+{{- end }}
