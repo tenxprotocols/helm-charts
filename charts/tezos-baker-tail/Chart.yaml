@@ -1,7 +1,8 @@
 ---
 apiVersion: v2
 name: tezos-baker-tail
-description: Live per-level baker classifier that subscribes to a Tezos node's head stream and emits JSON events plus Prometheus metrics.
+description: Live per-level baker classifier that subscribes to a Tezos node's
+  head stream and emits JSON events plus Prometheus metrics.
 
 maintainers:
   - name: tenxprotocols
@@ -9,5 +10,5 @@ maintainers:
     url: https://github.com/tenxprotocols
 
 type: application
-version: 0.1.0
+version: 1.0.0
 appVersion: "0.1.0"
