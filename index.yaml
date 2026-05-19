@@ -249,6 +249,22 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/tenx-http-exporter-0.1.0/tenx-http-exporter-0.1.0.tgz
     version: 0.1.0
+  tezos-baker-tail:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-05-19T00:56:01.680001649Z"
+    description: Live per-level baker classifier that subscribes to a Tezos node's
+      head stream and emits JSON events plus Prometheus metrics.
+    digest: b4e1f1f7a4a307b338dd548a281d5c0c298eef2810b362c0c7c0d593fea1ce66
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: tezos-baker-tail
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/tezos-baker-tail-1.0.0/tezos-baker-tail-1.0.0.tgz
+    version: 1.0.0
   tezos-octez:
   - apiVersion: v2
     appVersion: octez-v24.4
@@ -545,4 +561,4 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/valkey-0.2.0/valkey-0.2.0.tgz
     version: 0.2.0
-generated: "2026-05-16T17:17:59.22486344Z"
+generated: "2026-05-19T00:56:01.680068433Z"
