@@ -268,6 +268,20 @@ entries:
   tezos-octez:
   - apiVersion: v2
     appVersion: octez-v24.4
+    created: "2026-05-21T19:17:20.3916969Z"
+    description: A Helm chart for running a Tezos Octez node and baker
+    digest: c17a376573e585ac736b913e3bca90ae7ee2ffd3548b8ac6d75ec9381c0e8d8e
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: tezos-octez
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/tezos-octez-3.1.0/tezos-octez-3.1.0.tgz
+    version: 3.1.0
+  - apiVersion: v2
+    appVersion: octez-v24.4
     created: "2026-05-16T16:36:58.852593934Z"
     description: A Helm chart for running a Tezos Octez node and baker
     digest: 4e94eeea238b2b244ef1b1ce5faf15f097e39c0736265551c7abbcd08696e566
@@ -561,4 +575,4 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/valkey-0.2.0/valkey-0.2.0.tgz
     version: 0.2.0
-generated: "2026-05-19T00:56:01.680068433Z"
+generated: "2026-05-21T19:17:20.39188872Z"
