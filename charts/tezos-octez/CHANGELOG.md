@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.0.1...tezos-octez-v3.1.0) (2026-05-21)
+
+
+### Features
+
+* **tezos-octez:** add accuser deployment and extend component config ([91c4441](https://github.com/tenxprotocols/helm-charts/commit/91c444109bb9c277adc1e55ae2e08f1812e8f5d3))
+
 ## [3.0.1](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.0.0...tezos-octez-v3.0.1) (2026-05-16)
 
 
