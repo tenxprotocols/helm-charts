@@ -1,6 +1,49 @@
 # Default values for tezos-octez.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+#
+# ── Common extension points ─────────────────────────────────────────────
+# Each component (node, baker, accuser, dal) exposes the same set of
+# extension knobs so you can layer in extra config without forking the
+# chart:
+#
+#   extraArgs           list[string]              appended to the daemon CLI
+#   extraEnv            list[corev1.EnvVar]       appended to main-container env
+#   extraEnvFrom        list[corev1.EnvFromSource] appended to main-container envFrom
+#   extraVolumes        list[corev1.Volume]       added to the pod spec
+#   extraVolumeMounts   list[corev1.VolumeMount]  added to the main container
+#   extraInitContainers list[corev1.Container]    appended after chart init containers
+#   extraContainers     list[corev1.Container]    sidecar containers in the pod
+#
+# All default to [] (no-op). Lists are rendered as-is — use standard
+# Kubernetes object syntax. Example for the baker:
+#
+#   baker:
+#     extraArgs:
+#       - --allow-signing-delay
+#     extraEnv:
+#       - name: TEZOS_LOG
+#         value: '* -> notice'
+#       - name: GCP_PROJECT
+#         valueFrom:
+#           secretKeyRef:
+#             name: gcp-creds
+#             key: project_id
+#     extraEnvFrom:
+#       - configMapRef:
+#           name: extra-baker-env
+#     extraVolumes:
+#       - name: gcp-sa
+#         secret:
+#           secretName: gcp-sa-json
+#     extraVolumeMounts:
+#       - name: gcp-sa
+#         mountPath: /etc/gcp
+#         readOnly: true
+#     extraContainers:
+#       - name: log-forwarder
+#         image: fluent/fluent-bit:3.0
+#         # ...
 
 global:
   # Short, label-safe network name used for K8s labels, fullnames, log
@@ -66,6 +109,17 @@ node:
   metrics:
     enabled: true
     port: 9932
+
+  # Extension points — see "Common extension points" comment block at the
+  # top of this file.
+  extraArgs: []
+  extraEnv: []
+  extraEnvFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  extraInitContainers: []
+  extraContainers: []
+
   resources: {}
     # limits:
     #   cpu: "4"
@@ -107,6 +161,124 @@ baker:
   # BLS public key (BLpk...) for the companion key.
   companionPublicKey: ""
   liquidityBakingVote: "pass"
+
+  # ── octez-baker `run remotely` tuning flags ─────────────────────────────
+  # Each flag below is conditionally rendered: unset (~ / "" / [] / false)
+  # preserves the octez default. Quoted descriptions come verbatim from
+  # `octez-baker run remotely --help` (octez-v24.4). See the man page for
+  # the authoritative source.
+
+  # --keep-alive
+  # "Keep the daemon process alive: when the connection with the node is
+  # lost, the daemon periodically tries to reach it."
+  # Recommended on in Kubernetes: without it the baker exits on transient
+  # node-RPC disconnects and depends on the pod restart loop to reconnect.
+  keepAlive: true
+
+  # --record-state
+  # "If record-state flag is set, the baker saves all its internal consensus
+  # state in the filesystem, otherwise just in memory."
+  # Recommended on: prevents accidental equivocation if the baker votes then
+  # crashes before the next round. Persists to the client base-dir, which is
+  # an emptyDir in this chart — state survives container restarts within the
+  # same pod, but not pod recreation. For full crash-safety across pod
+  # recreation, mount a PersistentVolumeClaim at /home/tezos/.tezos-client.
+  recordState: true
+
+  # --pre-emptive-forge-time <seconds>
+  # "Sets the pre-emptive forge time optimization, in seconds. When set, the
+  # baker, if it is the next level round 0 proposer, will start forging
+  # after quorum has been reached in the current level while idly waiting
+  # for it to end. ... Operators should note that the higher this value `t`,
+  # the lower the operation inclusion window (specifically `block_time - t`)
+  # which may lead to lower baking rewards. Defaults to 15% of block time.
+  # Set to 0 to ignore pre-emptive forging."
+  # Note: 0 is a meaningful explicit value (disables the optimization).
+  # Use ~ for the octez default.
+  preEmptiveForgeTime: ~
+
+  # --remote-calls-timeout <seconds>
+  # "Sets a timeout for client calls such as signing block header or
+  # attestation and for the creation of deterministic nonce. Use only if
+  # your remote signer can handle concurrent requests."
+  # Unset preserves the octez default (no timeout). A tight value lets the
+  # baker fail fast on a wedged signatory replica and retry, allowing
+  # kube-proxy to route the retry to a healthy backend before the consensus
+  # round expires.
+  remoteCallsTimeout: ~
+
+  # --minimal-fees <tez>
+  # "exclude operations with fees lower than this threshold (in tez)"
+  # Floor for total operation fees. Combine with the two nanotez floors
+  # below for a full inclusion policy.
+  minimalFees: ~
+
+  # --minimal-nanotez-per-gas-unit <nanotez>
+  # "exclude operations with fees per gas lower than this threshold (in
+  # nanotez)"
+  minimalNanotezPerGasUnit: ~
+
+  # --minimal-nanotez-per-byte <nanotez>
+  # "exclude operations with fees per byte lower than this threshold (in
+  # nanotez)"
+  minimalNanotezPerByte: ~
+
+  # --node-version-check-bypass
+  # "If node-version-check-bypass flag is set, the baker will not check its
+  # compatibility with the version of the node to which it is connected."
+  # Useful during upgrade windows where baker and node binaries are briefly
+  # out of sync. Prefer nodeVersionAllowed below for narrower scope.
+  nodeVersionCheckBypass: false
+
+  # --node-version-allowed <product-[v]MAJOR.MINOR[.0]<info>[:<commit>]>
+  # "When specified the baker will accept to run with a node of this
+  # version. The specified version is composed of the product, for example
+  # 'octez'; the major and the minor versions that are positive integers;
+  # the info, for example '-rc', '-beta1+dev' or realese if none is
+  # provided; optionally the commit that is the hash of the last git commit
+  # or a prefix of at least 8 characters long."
+  # More precise than nodeVersionCheckBypass.
+  nodeVersionAllowed: ""
+
+  # --force-apply-from-round <round>
+  # "Force the baker to not only validate but also apply operations starting
+  # from the specified round."
+  # Operator escape hatch. Note: 0 is a valid round number, so use ~ for
+  # "unset" rather than 0.
+  forceApplyFromRound: ~
+
+  # --operations-pool <file|uri>
+  # "When specified, the baker will try to fetch operations from this file
+  # (or uri) and to include retrieved operations in the block. The expected
+  # format of the contents is a list of operations [ alpha.operation ].
+  # Environment variable
+  # 'TEZOS_CLIENT_REMOTE_OPERATIONS_POOL_HTTP_HEADERS' may also be specified
+  # to add headers to the requests (only 'host' headers are supported). If
+  # the resource cannot be retrieved, e.g., if the file is absent,
+  # unreadable, or the web service returns a 404 error, the resource is
+  # simply ignored."
+  operationsPool: ""
+
+  # --pidfile <filename>
+  # "write process id in file"
+  # Mostly useful with external supervisors; container runtimes provide
+  # their own PID 1 semantics so this is rarely needed.
+  pidfile: ""
+
+  # ── Extension points ────────────────────────────────────────────────────
+  # See "Common extension points" comment block at the top of this file.
+  # extraArgs for the baker is appended to the `octez-baker run remotely`
+  # invocation, after all the flags above and before the positional baker
+  # key alias. Entries are NOT shell-escaped, so quote any values containing
+  # spaces yourself.
+  extraArgs: []
+  extraEnv: []
+  extraEnvFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  extraInitContainers: []
+  extraContainers: []
+
   resources: {}
     # limits:
     #   cpu: "1"
@@ -119,6 +291,77 @@ baker:
   affinity: {}
   podAnnotations: {}
   podLabels: {}
+  # podSecurityContext is applied at the pod level (spec.template.spec.securityContext).
+  # Most commonly used to set sysctls — e.g. lower TCP SYN retries so a dead
+  # signatory drops the connect attempt fast enough to retry the next
+  # block/attestation slot:
+  #   podSecurityContext:
+  #     sysctls:
+  #       - name: net.ipv4.tcp_syn_retries
+  #         value: "2"   # ~7s connect timeout (1+2+4); default kernel is ~127s
+  podSecurityContext: {}
+
+accuser:
+  # The octez-accuser daemon watches the chain for double-baking and
+  # double-attesting and publishes slashing evidence (denunciation ops).
+  # Lightweight (single process, no signing keys, no DAL) and independent
+  # of the baker. Off by default — flip to true for production validators.
+  enabled: false
+  image:
+    repository: tezos/tezos
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+  # ── octez-accuser `run` tuning flags ────────────────────────────────────
+  # Quoted descriptions come verbatim from `octez-accuser run --help`
+  # (octez-v24.4).
+
+  # --keep-alive
+  # "Keep the daemon process alive: when the connection with the node is
+  # lost, the daemon periodically tries to reach it."
+  # Same rationale as baker.keepAlive — recommended on.
+  keepAlive: true
+
+  # --preserved-levels <threshold>
+  # "Number of effective levels kept in the accuser's memory"
+  # Tunes how many recent levels the accuser retains to detect
+  # equivocations. Unset preserves the octez default.
+  preservedLevels: ~
+
+  # --pidfile <filename>
+  # "write process id in file"
+  pidfile: ""
+
+  # ── Extension points ────────────────────────────────────────────────────
+  # See "Common extension points" comment block at the top of this file.
+  # extraArgs for the accuser is appended to the `octez-accuser run`
+  # invocation. Entries are NOT shell-escaped, so quote any values
+  # containing spaces yourself.
+  extraArgs: []
+  extraEnv: []
+  extraEnvFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  extraInitContainers: []
+  extraContainers: []
+
+  resources: {}
+    # limits:
+    #   cpu: 200m
+    #   memory: 512Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 128Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  podLabels: {}
+  # podSecurityContext is applied at the pod level
+  # (spec.template.spec.securityContext). See baker.podSecurityContext for
+  # the same TCP-tuning escape hatch.
+  podSecurityContext: {}
 
 dal:
   enabled: true
@@ -150,6 +393,17 @@ dal:
   storage:
     size: 50Gi
     storageClass: "premium-rwo"
+
+  # Extension points — see "Common extension points" comment block at the
+  # top of this file.
+  extraArgs: []
+  extraEnv: []
+  extraEnvFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  extraInitContainers: []
+  extraContainers: []
+
   resources: {}
     # limits:
     #   cpu: "2"

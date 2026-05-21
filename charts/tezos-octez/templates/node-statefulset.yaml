@@ -112,6 +112,9 @@ spec:
             - name: snapshot-tmp
               mountPath: /tmp
         {{- end }}
+        {{- with .Values.node.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
         - name: octez-node
           image: "{{ .Values.node.image.repository }}:{{ .Values.node.image.tag | default .Chart.AppVersion }}"
@@ -130,6 +133,17 @@ spec:
             - --metrics-addr
             - "0.0.0.0:{{ .Values.node.metrics.port }}"
             {{- end }}
+            {{- with .Values.node.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.node.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.node.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - name: rpc
               containerPort: {{ .Values.node.rpc.port }}
@@ -167,6 +181,12 @@ spec:
               mountPath: /var/tezos/node
             - name: config
               mountPath: /etc/tezos
+            {{- with .Values.node.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.node.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       volumes:
         - name: config
           configMap:
@@ -175,6 +195,9 @@ spec:
         {{- if .Values.snapshot.enabled }}
         - name: snapshot-tmp
           emptyDir: {}
+        {{- end }}
+        {{- with .Values.node.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.node.nodeSelector }}
       nodeSelector:
