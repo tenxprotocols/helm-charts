@@ -1,0 +1,128 @@
+{{- if .Values.accuser.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tezos-octez.accuserFullname" . }}
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+    app.kubernetes.io/component: accuser
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "tezos-octez.accuserSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.accuser.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "tezos-octez.accuserSelectorLabels" . | nindent 8 }}
+        tezos.io/chain: tezos
+        tezos.io/network: {{ .Values.global.network }}
+        {{- with .Values.accuser.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tezos-octez.serviceAccountName" . }}
+      {{- with .Values.accuser.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-for-node
+          image: "{{ .Values.accuser.image.repository }}:{{ .Values.accuser.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.accuser.image.pullPolicy }}
+          env:
+            - name: NODE_RPC_URL
+              value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
+          command:
+            - /bin/sh
+            - /etc/tezos/baker-wait.sh
+          volumeMounts:
+            - name: config
+              mountPath: /etc/tezos
+        {{- with .Values.accuser.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: octez-accuser
+          image: "{{ .Values.accuser.image.repository }}:{{ .Values.accuser.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.accuser.image.pullPolicy }}
+          env:
+            - name: NODE_RPC_URL
+              value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
+            - name: CLIENT_DIR
+              value: /home/tezos/.tezos-client
+            {{- with .Values.accuser.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.accuser.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              exec octez-accuser -E "${NODE_RPC_URL}" -d "${CLIENT_DIR}" \
+                run \
+                {{- if .Values.accuser.keepAlive }}
+                --keep-alive \
+                {{- end }}
+                {{- with .Values.accuser.preservedLevels }}
+                --preserved-levels {{ . }} \
+                {{- end }}
+                {{- with .Values.accuser.pidfile }}
+                --pidfile {{ . | quote }} \
+                {{- end }}
+                {{- range .Values.accuser.extraArgs }}
+                {{ . }} \
+                {{- end }}
+          {{- with .Values.accuser.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: client-dir
+              mountPath: /home/tezos/.tezos-client
+            - name: config
+              mountPath: /etc/tezos
+            {{- with .Values.accuser.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.accuser.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: client-dir
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: {{ include "tezos-octez.nodeFullname" . }}-config
+            defaultMode: 0755
+        {{- with .Values.accuser.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.accuser.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.accuser.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.accuser.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

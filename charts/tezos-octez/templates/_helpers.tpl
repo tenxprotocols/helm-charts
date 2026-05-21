@@ -67,6 +67,14 @@ app.kubernetes.io/component: baker
 {{- end }}
 
 {{/*
+Accuser selector labels
+*/}}
+{{- define "tezos-octez.accuserSelectorLabels" -}}
+{{ include "tezos-octez.selectorLabels" . }}
+app.kubernetes.io/component: accuser
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "tezos-octez.serviceAccountName" -}}
@@ -89,6 +97,13 @@ Baker fully qualified name
 */}}
 {{- define "tezos-octez.bakerFullname" -}}
 {{- printf "%s-baker" (include "tezos-octez.fullname" .) }}
+{{- end }}
+
+{{/*
+Accuser fully qualified name
+*/}}
+{{- define "tezos-octez.accuserFullname" -}}
+{{- printf "%s-accuser" (include "tezos-octez.fullname" .) }}
 {{- end }}
 
 {{/*

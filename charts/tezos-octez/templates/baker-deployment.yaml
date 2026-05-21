@@ -34,6 +34,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "tezos-octez.serviceAccountName" . }}
+      {{- with .Values.baker.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: wait-for-node
           image: "{{ .Values.baker.image.repository }}:{{ .Values.baker.image.tag | default .Chart.AppVersion }}"
@@ -47,6 +51,9 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/tezos
+        {{- with .Values.baker.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
         - name: octez-baker
           image: "{{ .Values.baker.image.repository }}:{{ .Values.baker.image.tag | default .Chart.AppVersion }}"
@@ -60,6 +67,13 @@ spec:
               value: {{ .Values.baker.liquidityBakingVote | quote }}
             - name: CLIENT_DIR
               value: /home/tezos/.tezos-client
+            {{- with .Values.baker.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.baker.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           command:
             - /bin/sh
             - -c
@@ -70,6 +84,42 @@ spec:
                 > "${CLIENT_DIR}/per_block_votes.json"
               exec octez-baker -E "${NODE_RPC_URL}" -d "${CLIENT_DIR}" \
                 run remotely \
+                {{- if .Values.baker.keepAlive }}
+                --keep-alive \
+                {{- end }}
+                {{- if .Values.baker.recordState }}
+                --record-state \
+                {{- end }}
+                {{- with .Values.baker.pidfile }}
+                --pidfile {{ . | quote }} \
+                {{- end }}
+                {{- if not (kindIs "invalid" .Values.baker.preEmptiveForgeTime) }}
+                --pre-emptive-forge-time {{ .Values.baker.preEmptiveForgeTime }} \
+                {{- end }}
+                {{- with .Values.baker.remoteCallsTimeout }}
+                --remote-calls-timeout {{ . }} \
+                {{- end }}
+                {{- if not (kindIs "invalid" .Values.baker.minimalFees) }}
+                --minimal-fees {{ .Values.baker.minimalFees }} \
+                {{- end }}
+                {{- if not (kindIs "invalid" .Values.baker.minimalNanotezPerGasUnit) }}
+                --minimal-nanotez-per-gas-unit {{ .Values.baker.minimalNanotezPerGasUnit }} \
+                {{- end }}
+                {{- if not (kindIs "invalid" .Values.baker.minimalNanotezPerByte) }}
+                --minimal-nanotez-per-byte {{ .Values.baker.minimalNanotezPerByte }} \
+                {{- end }}
+                {{- if .Values.baker.nodeVersionCheckBypass }}
+                --node-version-check-bypass \
+                {{- end }}
+                {{- with .Values.baker.nodeVersionAllowed }}
+                --node-version-allowed {{ . | quote }} \
+                {{- end }}
+                {{- if not (kindIs "invalid" .Values.baker.forceApplyFromRound) }}
+                --force-apply-from-round {{ .Values.baker.forceApplyFromRound }} \
+                {{- end }}
+                {{- with .Values.baker.operationsPool }}
+                --operations-pool {{ . | quote }} \
+                {{- end }}
                 {{- if .Values.dal.enabled }}
                 --dal-node "http://{{ include "tezos-octez.dalFullname" . }}:{{ .Values.dal.rpc.port }}" \
                 {{- else if .Values.dal.externalEndpoint }}
@@ -78,6 +128,9 @@ spec:
                 --without-dal \
                 {{- end }}
                 --votefile "${CLIENT_DIR}/per_block_votes.json" \
+                {{- range .Values.baker.extraArgs }}
+                {{ . }} \
+                {{- end }}
                 ${BAKER_KEY_ALIAS}{{- if .Values.baker.consensusKey }} consensus_key{{- end }}{{- if .Values.baker.companionKey }} companion_key{{- end }}
           {{- with .Values.baker.resources }}
           resources:
@@ -100,6 +153,12 @@ spec:
               readOnly: true
             - name: config
               mountPath: /etc/tezos
+            {{- with .Values.baker.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.baker.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       volumes:
         - name: client-dir
           emptyDir: {}
@@ -110,6 +169,9 @@ spec:
           configMap:
             name: {{ include "tezos-octez.nodeFullname" . }}-config
             defaultMode: 0755
+        {{- with .Values.baker.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.baker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
