@@ -85,6 +85,12 @@ signatory:
     secretKey: ""       # edsk...
     publicKey: ""       # edpk...
     publicKeyHash: ""   # tz1...
+    # When set, the chart does NOT render the <fullname>-client-keys Secret;
+    # the baker instead mounts this externally-managed Secret of the same
+    # shape (secret_keys / public_key_hashs / public_keys). Use this to keep
+    # the auth edsk out of git — e.g. populated from a secret store via an
+    # ExternalSecret. Takes precedence over the secretKey/publicKey above.
+    existingSecret: ""  # name of an existing client-keys Secret
 
 node:
   enabled: true

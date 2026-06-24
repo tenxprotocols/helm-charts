@@ -164,7 +164,7 @@ spec:
           emptyDir: {}
         - name: client-keys
           secret:
-            secretName: {{ include "tezos-octez.fullname" . }}-client-keys
+            secretName: {{ .Values.signatory.auth.existingSecret | default (printf "%s-client-keys" (include "tezos-octez.fullname" .)) }}
         - name: config
           configMap:
             name: {{ include "tezos-octez.nodeFullname" . }}-config
