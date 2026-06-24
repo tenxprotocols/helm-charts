@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.1.0...tezos-octez-v3.2.0) (2026-06-24)
+
+
+### Features
+
+* **tezos-octez:** support signatory.auth.existingSecret for client keys ([#59](https://github.com/tenxprotocols/helm-charts/issues/59)) ([a6eae1d](https://github.com/tenxprotocols/helm-charts/commit/a6eae1de7ed84624f727c053543869ac3e85b2a6))
+
 ## [3.1.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.0.1...tezos-octez-v3.1.0) (2026-05-21)
 
 
