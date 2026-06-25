@@ -14,10 +14,21 @@ spec:
   template:
     metadata:
       annotations:
-        {{- if not .Values.signatory.existingConfigMap }}
+        {{- if .Values.signatory.existingConfigMap }}
+        # External configMap: Helm can't hash it, so roll the pods when the
+        # operator bumps signatory.configChecksum (set it to the configMap's
+        # content hash/revision whenever authorized_keys / policy change).
+        {{- with .Values.signatory.configChecksum }}
+        checksum/config: {{ . }}
+        {{- end }}
+        {{- else }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- end }}
-        {{- if not .Values.signatory.existingSecret }}
+        {{- if .Values.signatory.existingSecret }}
+        {{- with .Values.signatory.secretChecksum }}
+        checksum/secret: {{ . }}
+        {{- end }}
+        {{- else }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.podAnnotations }}
