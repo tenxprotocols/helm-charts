@@ -20,6 +20,22 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+# ── Common extension points (mirror the tezos-octez chart) ───────────────
+# Layer extra config into the signatory pod without forking the chart. All
+# default to [] (no-op); use standard Kubernetes object syntax.
+#   extraArgs            list[string]               appended to the signatory CLI
+#                                                    (e.g. ["--json-log"] for JSON logs)
+#   extraEnv             list[corev1.EnvVar]        added to the container env
+#   extraEnvFrom         list[corev1.EnvFromSource] added to the container envFrom
+#   extraInitContainers  list[corev1.Container]     init containers
+#   extraContainers      list[corev1.Container]     sidecar containers
+# (Extra volumes / mounts use the existing `volumes` / `volumeMounts` values.)
+extraArgs: []
+extraEnv: []
+extraEnvFrom: []
+extraInitContainers: []
+extraContainers: []
+
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
 # This is to override the chart name.
