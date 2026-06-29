@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.3.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.2.0...tezos-octez-v3.3.0) (2026-06-29)
+
+
+### Features
+
+* **tezos-octez:** per-component replicaCount + update strategy ([#62](https://github.com/tenxprotocols/helm-charts/issues/62)) ([ac5c477](https://github.com/tenxprotocols/helm-charts/commit/ac5c477b483c6847433aecef5d81becb33b397cb))
+* **tezos-octez:** per-component replicaCount and update strategy ([88a14d3](https://github.com/tenxprotocols/helm-charts/commit/88a14d391d2989b33cfc5e5a2c091808f263b156))
+
 ## [3.2.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.1.0...tezos-octez-v3.2.0) (2026-06-24)
 
 
