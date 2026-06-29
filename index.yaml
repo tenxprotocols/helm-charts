@@ -141,6 +141,20 @@ entries:
   signatory:
   - apiVersion: v2
     appVersion: v1.3.1
+    created: "2026-06-29T21:17:28.832556434Z"
+    description: A Helm chart for Signatory - a Tezos Remote Signer
+    digest: 8abaf947f3a86671f87be8187cef479bf513246970a26b4fbe8b984ede8f8ec2
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: signatory
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/signatory-1.5.0/signatory-1.5.0.tgz
+    version: 1.5.0
+  - apiVersion: v2
+    appVersion: v1.3.1
     created: "2026-03-09T18:23:56.526666643Z"
     description: A Helm chart for Signatory - a Tezos Remote Signer
     digest: f045056ac979606aeef15fab6d744442595b25ce03eabcadaffa704268958b00
@@ -603,4 +617,4 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/valkey-0.2.0/valkey-0.2.0.tgz
     version: 0.2.0
-generated: "2026-06-29T19:35:08.731301891Z"
+generated: "2026-06-29T21:17:28.832617185Z"
