@@ -7,9 +7,9 @@ metadata:
     {{- include "tezos-octez.labels" . | nindent 4 }}
     app.kubernetes.io/component: accuser
 spec:
-  replicas: 1
+  replicas: {{ .Values.accuser.replicaCount }}
   strategy:
-    type: Recreate
+    {{- toYaml .Values.accuser.strategy | nindent 4 }}
   selector:
     matchLabels:
       {{- include "tezos-octez.accuserSelectorLabels" . | nindent 6 }}

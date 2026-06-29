@@ -7,9 +7,9 @@ metadata:
     {{- include "tezos-octez.labels" . | nindent 4 }}
     app.kubernetes.io/component: baker
 spec:
-  replicas: 1
+  replicas: {{ .Values.baker.replicaCount }}
   strategy:
-    type: Recreate
+    {{- toYaml .Values.baker.strategy | nindent 4 }}
   selector:
     matchLabels:
       {{- include "tezos-octez.bakerSelectorLabels" . | nindent 6 }}

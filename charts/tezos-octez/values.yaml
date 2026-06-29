@@ -146,6 +146,17 @@ baker:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
+  # Number of baker replicas. >1 runs active-active bakers behind the shared
+  # remote signer: the signer's high-watermark serialises signing per
+  # (key, level, round, op-type), so replicas cannot equivocate (no slashing).
+  # Spread them with podAntiAffinity (affinity below) across nodes/zones, and
+  # set strategy to RollingUpdate so an update never drops every baker at once.
+  replicaCount: 1
+  # Deployment update strategy. Default Recreate suits a single replica. For
+  # replicaCount > 1, use RollingUpdate with maxUnavailable: 0 (or 1 of N) to
+  # keep at least one baker signing through a rollout.
+  strategy:
+    type: Recreate
   bakerKey: ""
   # Public key (edpk...) for the baker. Required when the key has not been
   # revealed on chain yet (node RPC won't return it). When empty, the
@@ -318,6 +329,12 @@ accuser:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
+  # Number of accuser replicas. The accuser holds no keys and only publishes
+  # denunciations, so replicas are idempotent — safe to scale for HA.
+  replicaCount: 1
+  # Deployment update strategy (see baker.strategy).
+  strategy:
+    type: Recreate
 
   # ── octez-accuser `run` tuning flags ────────────────────────────────────
   # Quoted descriptions come verbatim from `octez-accuser run --help`
@@ -380,6 +397,10 @@ dal:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
+  # Number of DAL node replicas (StatefulSet). DAL nodes hold no consensus
+  # keys and DAL attestations are not slashable, so replicas are safe for HA;
+  # each gets its own PVC. Spread with podAntiAffinity (affinity below).
+  replicaCount: 1
   rpc:
     port: 10732
   p2p:

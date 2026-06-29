@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: dal
 spec:
   serviceName: {{ include "tezos-octez.dalFullname" . }}-headless
-  replicas: 1
+  replicas: {{ .Values.dal.replicaCount }}
   selector:
     matchLabels:
       {{- include "tezos-octez.dalSelectorLabels" . | nindent 6 }}
