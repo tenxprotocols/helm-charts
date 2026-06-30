@@ -116,6 +116,22 @@ node:
     enabled: true
     port: 9932
 
+  # Health probes. Empty {} = chart default (httpGet /version = process up).
+  # For baking nodes, override readinessProbe with a sync-gated exec check so a
+  # cold / catching-up node leaves the Service endpoints (no slot-critical baker
+  # RPCs routed to it). Example:
+  #   readinessProbe:
+  #     exec:
+  #       command:
+  #         - /bin/sh
+  #         - -c
+  #         - wget -qO- -T 2 http://localhost:8732/chains/main/is_bootstrapped | grep -q '"sync_state":"synced"'
+  #     periodSeconds: 10
+  #     timeoutSeconds: 5
+  #     failureThreshold: 3
+  livenessProbe: {}
+  readinessProbe: {}
+
   # Extension points — see "Common extension points" comment block at the
   # top of this file.
   extraArgs: []
