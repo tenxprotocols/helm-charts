@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.3.0...tezos-octez-v3.4.0) (2026-06-30)
+
+
+### Features
+
+* **tezos-octez:** overridable node liveness/readiness probes ([#66](https://github.com/tenxprotocols/helm-charts/issues/66)) ([2cd3cb1](https://github.com/tenxprotocols/helm-charts/commit/2cd3cb1050dfe8fece18b66397b7d16960d3d7e4))
+
 ## [3.3.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.2.0...tezos-octez-v3.3.0) (2026-06-29)
 
 

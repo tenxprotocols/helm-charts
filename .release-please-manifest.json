@@ -5,7 +5,7 @@
   "charts/juicefs": "0.2.0",
   "charts/outline": "0.1.0",
   "charts/signatory": "1.5.0",
-  "charts/tezos-octez": "3.3.0",
+  "charts/tezos-octez": "3.4.0",
   "charts/postgres": "0.3.0",
   "charts/valkey": "0.2.0",
   "charts/swarmforge": "0.5.0",
