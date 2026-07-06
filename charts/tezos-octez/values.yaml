@@ -421,6 +421,26 @@ dal:
     port: 10732
   p2p:
     port: 11732
+    # Per-replica listen/announced p2p ports, indexed by pod ordinal, e.g.
+    # [11732, 11734] (11733 is the metrics port). Set this whenever replicas
+    # share an egress IP (Cloud NAT): remote octez peers dedup connections by
+    # (observed IP, announced port), so replicas announcing the same port
+    # collide — the second one is rejected with Already_connected by every
+    # peer it dials and ends up with zero gossipsub peers. Must have at least
+    # replicaCount entries.
+    perPodPorts: []
+    external:
+      # Create one LoadBalancer Service per replica, exposing `port` on an
+      # external IP and targeting that pod's perPodPorts entry. Each pod
+      # discovers its Service's IP at startup (k8s API, RBAC included) and
+      # announces --public-addr <ip>:<port>, so DAL peer exchange hands out
+      # a reachable address and inbound connections work despite NAT.
+      # Requires perPodPorts.
+      enabled: false
+      # Optional static IPs (index = ordinal). Empty = cloud-allocated; an
+      # allocated IP can later be promoted to static and pinned here without
+      # recreating the Service.
+      loadBalancerIPs: []
   metrics:
     enabled: true
     port: 11733
