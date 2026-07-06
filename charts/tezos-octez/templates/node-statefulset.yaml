@@ -129,15 +129,6 @@ spec:
             - "0.0.0.0:{{ .Values.node.rpc.port }}"
             - --net-addr
             - "[::]:{{ .Values.node.p2p.port }}"
-            {{- if .Values.node.p2p.advertisedPortPerPod }}
-            # Distinct announced port per pod so replicas behind a shared
-            # egress IP don't collide on the remote's (IP, announced port)
-            # connection dedup. $(POD_INDEX) is expanded by Kubernetes from
-            # the downward-API env var below; expansion can't do arithmetic,
-            # so the port is digit-concatenated: (port/10)*10 + ordinal.
-            - --advertised-net-port
-            - "{{ div .Values.node.p2p.port 10 }}$(POD_INDEX)"
-            {{- end }}
             {{- if .Values.node.metrics.enabled }}
             - --metrics-addr
             - "0.0.0.0:{{ .Values.node.metrics.port }}"
@@ -145,18 +136,9 @@ spec:
             {{- with .Values.node.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if or .Values.node.p2p.advertisedPortPerPod .Values.node.extraEnv }}
+          {{- with .Values.node.extraEnv }}
           env:
-            {{- if .Values.node.p2p.advertisedPortPerPod }}
-            # Pod ordinal, expanded into --advertised-net-port above.
-            - name: POD_INDEX
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['apps.kubernetes.io/pod-index']
-            {{- end }}
-            {{- with .Values.node.extraEnv }}
             {{- toYaml . | nindent 12 }}
-            {{- end }}
           {{- end }}
           {{- with .Values.node.extraEnvFrom }}
           envFrom:

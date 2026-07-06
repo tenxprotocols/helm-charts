@@ -70,17 +70,28 @@ spec:
               value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
             - name: DATA_DIR
               value: /var/tezos/dal
-            {{- if .Values.dal.p2p.portPerPod }}
-            # Consumed by dal-run.sh: per-pod --net-addr (base + 2*ordinal)
-            # and optional --public-addr from the ordinal-indexed IP list.
-            - name: DAL_P2P_PORT_PER_POD
-              value: "true"
-            - name: DAL_P2P_BASE_PORT
-              value: {{ .Values.dal.p2p.port | quote }}
-            {{- with .Values.dal.p2p.loadBalancerIPs }}
-            - name: DAL_P2P_PUBLIC_IPS
+            {{- with .Values.dal.p2p.perPodPorts }}
+            {{- if lt (len .) (int $.Values.dal.replicaCount) }}
+            {{- fail "dal.p2p.perPodPorts must have at least dal.replicaCount entries" }}
+            {{- end }}
+            # Consumed by dal-run.sh: per-pod --net-addr, indexed by ordinal.
+            - name: DAL_P2P_PORTS
               value: {{ join "," . | quote }}
             {{- end }}
+            {{- if .Values.dal.p2p.external.enabled }}
+            {{- if not .Values.dal.p2p.perPodPorts }}
+            {{- fail "dal.p2p.external.enabled requires dal.p2p.perPodPorts" }}
+            {{- end }}
+            # Consumed by dal-run.sh: discover this pod's LoadBalancer IP
+            # (Service <prefix><ordinal>) and announce --public-addr.
+            - name: DAL_P2P_EXTERNAL_SERVICE_PREFIX
+              value: {{ include "tezos-octez.dalFullname" . }}-p2p-
+            - name: DAL_P2P_PORT
+              value: {{ .Values.dal.p2p.port | quote }}
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             {{- end }}
             {{- with .Values.dal.extraEnv }}
             {{- toYaml . | nindent 12 }}
@@ -100,7 +111,7 @@ spec:
             - "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
             - --rpc-addr
             - "0.0.0.0:{{ .Values.dal.rpc.port }}"
-            {{- if not .Values.dal.p2p.portPerPod }}
+            {{- if not .Values.dal.p2p.perPodPorts }}
             - --net-addr
             - "0.0.0.0:{{ .Values.dal.p2p.port }}"
             {{- end }}
@@ -136,9 +147,9 @@ spec:
             - name: rpc
               containerPort: {{ .Values.dal.rpc.port }}
               protocol: TCP
-            # With portPerPod, the actual listen port is base + 2*ordinal;
-            # this declaration matches ordinal 0 and is informational for the
-            # rest (per-pod LB Services target the per-pod port numerically).
+            # With perPodPorts, the actual listen port is the ordinal-indexed
+            # list entry; this declaration is informational (per-pod LB
+            # Services target the per-pod port numerically).
             - name: p2p
               containerPort: {{ .Values.dal.p2p.port }}
               protocol: TCP

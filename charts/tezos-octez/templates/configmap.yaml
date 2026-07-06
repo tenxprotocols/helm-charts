@@ -52,22 +52,34 @@ data:
     # the DAL node to exit 1. This wrapper restarts it quickly with
     # a short fixed delay instead of Kubernetes' exponential backoff.
 
-    # Per-pod p2p addressing (see dal.p2p.portPerPod / dal.p2p.loadBalancerIPs).
+    # Per-pod p2p addressing (see dal.p2p.perPodPorts / dal.p2p.external).
     # Remote octez peers dedup connections by (observed IP, announced port);
     # replicas behind one egress IP must announce distinct ports or the
     # second one is rejected with Already_connected by every peer it dials.
     NET_ARGS=""
-    if [ -n "$DAL_P2P_PORT_PER_POD" ]; then
+    if [ -n "$DAL_P2P_PORTS" ]; then
       ORDINAL="${HOSTNAME##*-}"
-      NET_PORT=$((DAL_P2P_BASE_PORT + 2 * ORDINAL))
+      NET_PORT=$(echo "$DAL_P2P_PORTS" | cut -d, -f$((ORDINAL + 1)))
       NET_ARGS="--net-addr 0.0.0.0:${NET_PORT}"
-      if [ -n "$DAL_P2P_PUBLIC_IPS" ]; then
-        PUBLIC_IP=$(echo "$DAL_P2P_PUBLIC_IPS" | cut -d, -f$((ORDINAL + 1)))
-        if [ -n "$PUBLIC_IP" ]; then
-          # External LB maps <ip>:base port -> this pod's NET_PORT.
-          NET_ARGS="$NET_ARGS --public-addr ${PUBLIC_IP}:${DAL_P2P_BASE_PORT}"
-        fi
-      fi
+    fi
+    if [ -n "$DAL_P2P_EXTERNAL_SERVICE_PREFIX" ]; then
+      # Wait for this pod's LoadBalancer Service to get an external IP and
+      # advertise it, so DAL peer exchange hands out a reachable address.
+      SVC="${DAL_P2P_EXTERNAL_SERVICE_PREFIX}${ORDINAL}"
+      TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+      # busybox wget has no --ca-certificate; the bearer token still
+      # authenticates us to the in-cluster apiserver.
+      URL="https://kubernetes.default.svc/api/v1/namespaces/${POD_NAMESPACE}/services/${SVC}"
+      while :; do
+        PUBLIC_IP=$(wget -qO- --no-check-certificate \
+          --header "Authorization: Bearer ${TOKEN}" "$URL" \
+          | tr -d ' \n' | grep -o '"ip":"[0-9.]*"' | head -1 | grep -o '[0-9][0-9.]*')
+        [ -n "$PUBLIC_IP" ] && break
+        echo "Waiting for external IP on Service ${SVC}..."
+        sleep 5
+      done
+      echo "Advertising public address ${PUBLIC_IP}:${DAL_P2P_PORT}"
+      NET_ARGS="$NET_ARGS --public-addr ${PUBLIC_IP}:${DAL_P2P_PORT}"
     fi
 
     RESTART_DELAY=5

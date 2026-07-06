@@ -1,17 +1,16 @@
 {{- /*
-One LoadBalancer Service per DAL replica (index = pod ordinal), each pinned
-to a static external IP. Externally every pod is reachable on the default
-p2p port; the LB targets that pod's per-pod listen port (base + 2*ordinal),
-which is what the pod actually binds under dal.p2p.portPerPod. The pod
-announces --public-addr <ip>:<base port>, so DAL peer exchange hands out the
-LB address and inbound connections work despite NAT.
+One LoadBalancer Service per DAL replica (index = pod ordinal). Externally
+every pod is reachable on the default p2p port; the LB targets that pod's
+perPodPorts entry, which is what the pod binds. At startup each pod reads
+its Service's external IP (RBAC below) and announces
+--public-addr <ip>:<port>, so DAL peer exchange hands out the LB address
+and inbound connections work despite NAT. IPs are cloud-allocated unless
+pinned via dal.p2p.external.loadBalancerIPs.
 */ -}}
-{{- if and .Values.dal.enabled .Values.dal.p2p.loadBalancerIPs }}
-{{- if not .Values.dal.p2p.portPerPod }}
-{{- fail "dal.p2p.loadBalancerIPs requires dal.p2p.portPerPod=true (per-pod listen ports are what the LBs target)" }}
-{{- end }}
+{{- if and .Values.dal.enabled .Values.dal.p2p.external.enabled }}
 {{- $root := . }}
-{{- range $i, $ip := .Values.dal.p2p.loadBalancerIPs }}
+{{- range $i := until (int .Values.dal.replicaCount) }}
+{{- $port := index $root.Values.dal.p2p.perPodPorts $i }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -21,18 +20,53 @@ metadata:
     app.kubernetes.io/component: dal
 spec:
   type: LoadBalancer
-  loadBalancerIP: {{ $ip }}
+  {{- with $root.Values.dal.p2p.external.loadBalancerIPs }}
+  {{- if gt (len .) $i }}
+  loadBalancerIP: {{ index . $i }}
+  {{- end }}
+  {{- end }}
   # Local avoids a second hop and preserves the client source IP; the
   # selector pins to a single pod, so there is no cross-node imbalance.
   externalTrafficPolicy: Local
   ports:
     - name: p2p
       port: {{ $root.Values.dal.p2p.port }}
-      targetPort: {{ add $root.Values.dal.p2p.port (mul 2 $i) }}
+      targetPort: {{ $port }}
       protocol: TCP
   selector:
     {{- include "tezos-octez.dalSelectorLabels" $root | nindent 4 }}
     statefulset.kubernetes.io/pod-name: {{ include "tezos-octez.dalFullname" $root }}-{{ $i }}
 ---
 {{- end }}
+{{- /*
+Each DAL pod reads its own LoadBalancer Service to learn the external IP it
+should announce (dal-run.sh).
+*/}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "tezos-octez.dalFullname" . }}-svc-reader
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dal
+rules:
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "tezos-octez.dalFullname" . }}-svc-reader
+  labels:
+    {{- include "tezos-octez.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dal
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "tezos-octez.dalFullname" . }}-svc-reader
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "tezos-octez.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
 {{- end }}
