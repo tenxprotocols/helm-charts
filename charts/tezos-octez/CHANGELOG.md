@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.4.0...tezos-octez-v3.5.0) (2026-07-06)
+
+
+### Features
+
+* **tezos-octez:** per-pod DAL p2p ports and self-provisioned ingress ([#68](https://github.com/tenxprotocols/helm-charts/issues/68)) ([1eac915](https://github.com/tenxprotocols/helm-charts/commit/1eac915aa6bd4207d9cbbb52733ba412ece24591))
+
 ## [3.4.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.3.0...tezos-octez-v3.4.0) (2026-06-30)
 
 
