@@ -51,10 +51,30 @@ data:
     # The gossipsub worker can crash due to an upstream bug, causing
     # the DAL node to exit 1. This wrapper restarts it quickly with
     # a short fixed delay instead of Kubernetes' exponential backoff.
+
+    # Per-pod p2p addressing (see dal.p2p.portPerPod / dal.p2p.loadBalancerIPs).
+    # Remote octez peers dedup connections by (observed IP, announced port);
+    # replicas behind one egress IP must announce distinct ports or the
+    # second one is rejected with Already_connected by every peer it dials.
+    NET_ARGS=""
+    if [ -n "$DAL_P2P_PORT_PER_POD" ]; then
+      ORDINAL="${HOSTNAME##*-}"
+      NET_PORT=$((DAL_P2P_BASE_PORT + 2 * ORDINAL))
+      NET_ARGS="--net-addr 0.0.0.0:${NET_PORT}"
+      if [ -n "$DAL_P2P_PUBLIC_IPS" ]; then
+        PUBLIC_IP=$(echo "$DAL_P2P_PUBLIC_IPS" | cut -d, -f$((ORDINAL + 1)))
+        if [ -n "$PUBLIC_IP" ]; then
+          # External LB maps <ip>:base port -> this pod's NET_PORT.
+          NET_ARGS="$NET_ARGS --public-addr ${PUBLIC_IP}:${DAL_P2P_BASE_PORT}"
+        fi
+      fi
+    fi
+
     RESTART_DELAY=5
     while true; do
       echo "Starting DAL node..."
-      octez-dal-node "$@"
+      # shellcheck disable=SC2086  # NET_ARGS is intentionally word-split
+      octez-dal-node "$@" $NET_ARGS
       EXIT_CODE=$?
       echo "DAL node exited with code $EXIT_CODE. Restarting in ${RESTART_DELAY}s..."
       sleep "$RESTART_DELAY"

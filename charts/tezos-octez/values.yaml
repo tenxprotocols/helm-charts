@@ -112,6 +112,12 @@ node:
     port: 8732
   p2p:
     port: 9732
+    # Announce a distinct p2p port per pod (port + ordinal) in the octez
+    # handshake. Remote peers dedup connections by (observed IP, announced
+    # port), so replicas dialing out from a shared egress IP (NAT) collide
+    # and get rejected with Already_connected unless their announced ports
+    # differ. Listen port is unchanged; only --advertised-net-port varies.
+    advertisedPortPerPod: false
   metrics:
     enabled: true
     port: 9932
@@ -421,6 +427,19 @@ dal:
     port: 10732
   p2p:
     port: 11732
+    # Listen on (and thus announce) a distinct p2p port per pod:
+    # port + 2*ordinal. Remote peers dedup connections by (observed IP,
+    # announced port), so DAL replicas dialing the small bootstrap set from a
+    # shared egress IP (NAT) collide: the second replica is rejected with
+    # Already_connected and ends up with zero gossipsub peers. Distinct
+    # announced ports remove the collision regardless of egress topology.
+    portPerPod: false
+    # One static external IP per replica (index = pod ordinal). For each IP a
+    # per-pod LoadBalancer Service is created, exposing the default p2p port
+    # externally and targeting that pod's per-pod listen port, and the pod
+    # announces --public-addr <ip>:<port> so peer exchange hands out a
+    # reachable address (inbound connections). Requires portPerPod: true.
+    loadBalancerIPs: []
   metrics:
     enabled: true
     port: 11733

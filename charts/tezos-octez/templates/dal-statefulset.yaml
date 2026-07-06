@@ -70,6 +70,18 @@ spec:
               value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
             - name: DATA_DIR
               value: /var/tezos/dal
+            {{- if .Values.dal.p2p.portPerPod }}
+            # Consumed by dal-run.sh: per-pod --net-addr (base + 2*ordinal)
+            # and optional --public-addr from the ordinal-indexed IP list.
+            - name: DAL_P2P_PORT_PER_POD
+              value: "true"
+            - name: DAL_P2P_BASE_PORT
+              value: {{ .Values.dal.p2p.port | quote }}
+            {{- with .Values.dal.p2p.loadBalancerIPs }}
+            - name: DAL_P2P_PUBLIC_IPS
+              value: {{ join "," . | quote }}
+            {{- end }}
+            {{- end }}
             {{- with .Values.dal.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -88,8 +100,10 @@ spec:
             - "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
             - --rpc-addr
             - "0.0.0.0:{{ .Values.dal.rpc.port }}"
+            {{- if not .Values.dal.p2p.portPerPod }}
             - --net-addr
             - "0.0.0.0:{{ .Values.dal.p2p.port }}"
+            {{- end }}
             {{- if .Values.dal.metrics.enabled }}
             - --metrics-addr
             - "0.0.0.0:{{ .Values.dal.metrics.port }}"
@@ -122,6 +136,9 @@ spec:
             - name: rpc
               containerPort: {{ .Values.dal.rpc.port }}
               protocol: TCP
+            # With portPerPod, the actual listen port is base + 2*ordinal;
+            # this declaration matches ordinal 0 and is informational for the
+            # rest (per-pod LB Services target the per-pod port numerically).
             - name: p2p
               containerPort: {{ .Values.dal.p2p.port }}
               protocol: TCP

@@ -119,8 +119,19 @@ spec:
         - name: octez-node
           image: "{{ .Values.node.image.repository }}:{{ .Values.node.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.node.image.pullPolicy }}
+          {{- if .Values.node.p2p.advertisedPortPerPod }}
+          # Announce port + ordinal in the p2p handshake so replicas behind a
+          # shared egress IP don't collide on the remote's (IP, announced
+          # port) connection dedup. Listen port is unchanged.
+          command:
+            - /bin/sh
+            - -c
+            - 'exec octez-node "$@" --advertised-net-port "$(({{ .Values.node.p2p.port }} + ${HOSTNAME##*-}))"'
+            - octez-node
+          {{- else }}
           command:
             - octez-node
+          {{- end }}
           args:
             - run
             - --data-dir

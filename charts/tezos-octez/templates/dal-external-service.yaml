@@ -1,0 +1,38 @@
+{{- /*
+One LoadBalancer Service per DAL replica (index = pod ordinal), each pinned
+to a static external IP. Externally every pod is reachable on the default
+p2p port; the LB targets that pod's per-pod listen port (base + 2*ordinal),
+which is what the pod actually binds under dal.p2p.portPerPod. The pod
+announces --public-addr <ip>:<base port>, so DAL peer exchange hands out the
+LB address and inbound connections work despite NAT.
+*/ -}}
+{{- if and .Values.dal.enabled .Values.dal.p2p.loadBalancerIPs }}
+{{- if not .Values.dal.p2p.portPerPod }}
+{{- fail "dal.p2p.loadBalancerIPs requires dal.p2p.portPerPod=true (per-pod listen ports are what the LBs target)" }}
+{{- end }}
+{{- $root := . }}
+{{- range $i, $ip := .Values.dal.p2p.loadBalancerIPs }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tezos-octez.dalFullname" $root }}-p2p-{{ $i }}
+  labels:
+    {{- include "tezos-octez.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: dal
+spec:
+  type: LoadBalancer
+  loadBalancerIP: {{ $ip }}
+  # Local avoids a second hop and preserves the client source IP; the
+  # selector pins to a single pod, so there is no cross-node imbalance.
+  externalTrafficPolicy: Local
+  ports:
+    - name: p2p
+      port: {{ $root.Values.dal.p2p.port }}
+      targetPort: {{ add $root.Values.dal.p2p.port (mul 2 $i) }}
+      protocol: TCP
+  selector:
+    {{- include "tezos-octez.dalSelectorLabels" $root | nindent 4 }}
+    statefulset.kubernetes.io/pod-name: {{ include "tezos-octez.dalFullname" $root }}-{{ $i }}
+---
+{{- end }}
+{{- end }}
