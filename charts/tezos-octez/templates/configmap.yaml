@@ -45,53 +45,6 @@ data:
       sleep 5
     done
 
-  dal-run.sh: |
-    #!/bin/sh
-    # Restart loop for octez-dal to avoid Kubernetes CrashLoopBackOff.
-    # The gossipsub worker can crash due to an upstream bug, causing
-    # the DAL node to exit 1. This wrapper restarts it quickly with
-    # a short fixed delay instead of Kubernetes' exponential backoff.
-
-    # Per-pod p2p addressing (see dal.p2p.perPodPorts / dal.p2p.external).
-    # Remote octez peers dedup connections by (observed IP, announced port);
-    # replicas behind one egress IP must announce distinct ports or the
-    # second one is rejected with Already_connected by every peer it dials.
-    NET_ARGS=""
-    if [ -n "$DAL_P2P_PORTS" ]; then
-      ORDINAL="${HOSTNAME##*-}"
-      NET_PORT=$(echo "$DAL_P2P_PORTS" | cut -d, -f$((ORDINAL + 1)))
-      NET_ARGS="--net-addr 0.0.0.0:${NET_PORT}"
-    fi
-    if [ -n "$DAL_P2P_EXTERNAL_SERVICE_PREFIX" ]; then
-      # Wait for this pod's LoadBalancer Service to get an external IP and
-      # advertise it, so DAL peer exchange hands out a reachable address.
-      SVC="${DAL_P2P_EXTERNAL_SERVICE_PREFIX}${ORDINAL}"
-      TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-      # busybox wget has no --ca-certificate; the bearer token still
-      # authenticates us to the in-cluster apiserver.
-      URL="https://kubernetes.default.svc/api/v1/namespaces/${POD_NAMESPACE}/services/${SVC}"
-      while :; do
-        PUBLIC_IP=$(wget -qO- --no-check-certificate \
-          --header "Authorization: Bearer ${TOKEN}" "$URL" \
-          | tr -d ' \n' | grep -o '"ip":"[0-9.]*"' | head -1 | grep -o '[0-9][0-9.]*')
-        [ -n "$PUBLIC_IP" ] && break
-        echo "Waiting for external IP on Service ${SVC}..."
-        sleep 5
-      done
-      echo "Advertising public address ${PUBLIC_IP}:${DAL_P2P_PORT}"
-      NET_ARGS="$NET_ARGS --public-addr ${PUBLIC_IP}:${DAL_P2P_PORT}"
-    fi
-
-    RESTART_DELAY=5
-    while true; do
-      echo "Starting DAL node..."
-      # shellcheck disable=SC2086  # NET_ARGS is intentionally word-split
-      octez-dal-node "$@" $NET_ARGS
-      EXIT_CODE=$?
-      echo "DAL node exited with code $EXIT_CODE. Restarting in ${RESTART_DELAY}s..."
-      sleep "$RESTART_DELAY"
-    done
-
   snapshot-download.sh: |
     #!/bin/sh
     set -e
