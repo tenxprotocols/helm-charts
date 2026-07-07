@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.5.0...tezos-octez-v4.0.0) (2026-07-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **tezos-octez:** dal.p2p.perPodPorts and dal.p2p.external.loadBalancerIPs are replaced by dal.p2p.portPrefix and dal.p2p.external.loadBalancerIP.
+
+### Features
+
+* **tezos-octez:** args-only per-pod DAL p2p, drop dal-run.sh wrapper ([#71](https://github.com/tenxprotocols/helm-charts/issues/71)) ([d3c2dd0](https://github.com/tenxprotocols/helm-charts/commit/d3c2dd019a6c34b03ab77e038577948007f4b496))
+
 ## [3.5.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.4.0...tezos-octez-v3.5.0) (2026-07-06)
 
 
