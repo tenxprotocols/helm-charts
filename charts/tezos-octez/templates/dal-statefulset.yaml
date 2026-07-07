@@ -70,28 +70,15 @@ spec:
               value: "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
             - name: DATA_DIR
               value: /var/tezos/dal
-            {{- with .Values.dal.p2p.perPodPorts }}
-            {{- if lt (len .) (int $.Values.dal.replicaCount) }}
-            {{- fail "dal.p2p.perPodPorts must have at least dal.replicaCount entries" }}
+            {{- if .Values.dal.p2p.portPrefix }}
+            {{- if gt (int .Values.dal.replicaCount) 10 }}
+            {{- fail "dal.p2p.portPrefix supports at most 10 replicas (single ordinal digit)" }}
             {{- end }}
-            # Consumed by dal-run.sh: per-pod --net-addr, indexed by ordinal.
-            - name: DAL_P2P_PORTS
-              value: {{ join "," . | quote }}
-            {{- end }}
-            {{- if .Values.dal.p2p.external.enabled }}
-            {{- if not .Values.dal.p2p.perPodPorts }}
-            {{- fail "dal.p2p.external.enabled requires dal.p2p.perPodPorts" }}
-            {{- end }}
-            # Consumed by dal-run.sh: discover this pod's LoadBalancer IP
-            # (Service <prefix><ordinal>) and announce --public-addr.
-            - name: DAL_P2P_EXTERNAL_SERVICE_PREFIX
-              value: {{ include "tezos-octez.dalFullname" . }}-p2p-
-            - name: DAL_P2P_PORT
-              value: {{ .Values.dal.p2p.port | quote }}
-            - name: POD_NAMESPACE
+            # Pod ordinal, expanded by Kubernetes into the p2p port args below.
+            - name: POD_INDEX
               valueFrom:
                 fieldRef:
-                  fieldPath: metadata.namespace
+                  fieldPath: metadata.labels['apps.kubernetes.io/pod-index']
             {{- end }}
             {{- with .Values.dal.extraEnv }}
             {{- toYaml . | nindent 12 }}
@@ -101,8 +88,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           command:
-            - /bin/sh
-            - /etc/tezos/dal-run.sh
+            - octez-dal-node
           args:
             - run
             - --data-dir
@@ -111,7 +97,27 @@ spec:
             - "http://{{ include "tezos-octez.nodeFullname" . }}:{{ .Values.node.rpc.port }}"
             - --rpc-addr
             - "0.0.0.0:{{ .Values.dal.rpc.port }}"
-            {{- if not .Values.dal.p2p.perPodPorts }}
+            {{- if .Values.dal.p2p.portPrefix }}
+            # Distinct listen/announced port per pod (<portPrefix><ordinal>):
+            # remote octez peers dedup connections by (observed IP, announced
+            # port), so replicas dialing out from a shared egress IP (NAT)
+            # otherwise collide and get rejected with Already_connected.
+            - --net-addr
+            - "0.0.0.0:{{ .Values.dal.p2p.portPrefix }}$(POD_INDEX)"
+            {{- if .Values.dal.p2p.external.enabled }}
+            {{- if not .Values.dal.p2p.external.loadBalancerIP }}
+            {{- fail "dal.p2p.external.enabled requires dal.p2p.external.loadBalancerIP" }}
+            {{- end }}
+            # All per-pod LoadBalancers share one IP (one forwarding rule per
+            # port), so the advertised address only differs by the per-pod
+            # port and stays expressible as a uniform arg.
+            - --public-addr
+            - "{{ .Values.dal.p2p.external.loadBalancerIP }}:{{ .Values.dal.p2p.portPrefix }}$(POD_INDEX)"
+            {{- end }}
+            {{- else }}
+            {{- if .Values.dal.p2p.external.enabled }}
+            {{- fail "dal.p2p.external.enabled requires dal.p2p.portPrefix" }}
+            {{- end }}
             - --net-addr
             - "0.0.0.0:{{ .Values.dal.p2p.port }}"
             {{- end }}
@@ -147,9 +153,9 @@ spec:
             - name: rpc
               containerPort: {{ .Values.dal.rpc.port }}
               protocol: TCP
-            # With perPodPorts, the actual listen port is the ordinal-indexed
-            # list entry; this declaration is informational (per-pod LB
-            # Services target the per-pod port numerically).
+            # With portPrefix, the actual listen port is <portPrefix><ordinal>;
+            # this declaration is informational (per-pod LB Services target
+            # the per-pod port numerically).
             - name: p2p
               containerPort: {{ .Values.dal.p2p.port }}
               protocol: TCP
