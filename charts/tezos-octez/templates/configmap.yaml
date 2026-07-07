@@ -82,12 +82,23 @@ data:
       NET_ARGS="$NET_ARGS --public-addr ${PUBLIC_IP}:${DAL_P2P_PORT}"
     fi
 
+    # Forward SIGTERM to the DAL node and stop the restart loop: without
+    # this, pod shutdown SIGKILLs the node mid-connection and remote peers
+    # keep the dead session for ~15min of TCP retransmits — during which
+    # they reject the restarted pod's dials as Already_connected (they dedup
+    # by observed IP + announced port).
+    CHILD=0
+    trap 'STOPPING=1; [ "$CHILD" -gt 0 ] && kill -TERM "$CHILD" 2>/dev/null' TERM INT
+
     RESTART_DELAY=5
-    while true; do
+    while [ -z "$STOPPING" ]; do
       echo "Starting DAL node..."
       # shellcheck disable=SC2086  # NET_ARGS is intentionally word-split
-      octez-dal-node "$@" $NET_ARGS
+      octez-dal-node "$@" $NET_ARGS &
+      CHILD=$!
+      wait "$CHILD"
       EXIT_CODE=$?
+      [ -n "$STOPPING" ] && exit "$EXIT_CODE"
       echo "DAL node exited with code $EXIT_CODE. Restarting in ${RESTART_DELAY}s..."
       sleep "$RESTART_DELAY"
     done
