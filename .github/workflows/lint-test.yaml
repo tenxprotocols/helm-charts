@@ -40,6 +40,10 @@ jobs:
       # The juicefs chart is excluded from `ct install` because its format
       # initContainer requires a reachable object-store endpoint (R2) which
       # is not available in CI. It is still linted and template-rendered.
+      # The heimdall-bot chart is excluded because it consumes an existing
+      # Secret (heimdall-bot-secret) that is not present in the kind cluster,
+      # so its pod can never become Ready. It is still linted and
+      # template-rendered.
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct install --target-branch ${{ github.event.repository.default_branch }} --excluded-charts juicefs
+        run: ct install --target-branch ${{ github.event.repository.default_branch }} --excluded-charts juicefs,heimdall-bot

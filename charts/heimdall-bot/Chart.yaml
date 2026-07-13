@@ -1,0 +1,13 @@
+---
+apiVersion: v2
+name: heimdall-bot
+description: Heimdall — TenX Slack AI assistant (cluster investigation, on-chain lookups, Drive docs)
+
+maintainers:
+  - name: tenxprotocols
+    email: software@tenx.inc
+    url: https://github.com/tenxprotocols
+
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "heimdall-bot.fullname" . }}
+  labels:
+    {{- include "heimdall-bot.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "heimdall-bot.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "heimdall-bot.labels" . | nindent 8 }}
+        tags.datadoghq.com/service: {{ include "heimdall-bot.name" . }}
+        tags.datadoghq.com/version: {{ .Values.image.tag | default .Chart.AppVersion | quote }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "heimdall-bot.fullname" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+        - name: bot
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          envFrom:
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+          env:
+            - name: MODEL
+              value: {{ .Values.model | quote }}
+            - name: HOLMES_URL
+              value: {{ .Values.holmes.url | quote }}
+            - name: HOLMES_MODEL
+              value: {{ .Values.holmes.model | quote }}
+            - name: STREAMING
+              value: {{ .Values.streaming | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
+          ports:
+            - name: health
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
