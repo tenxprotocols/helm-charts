@@ -41,6 +41,22 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/domain-exporter-0.1.0/domain-exporter-0.1.0.tgz
     version: 0.1.0
+  heimdall-bot:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-07-14T00:02:58.718025721Z"
+    description: Heimdall — TenX Slack AI assistant (cluster investigation, on-chain
+      lookups, Drive docs)
+    digest: 23ac9559f1d2d2a55be1b673651318105698dd1a882ee80650299285bc7af68a
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: heimdall-bot
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/heimdall-bot-0.1.0/heimdall-bot-0.1.0.tgz
+    version: 0.1.0
   http-exporter:
   - apiVersion: v2
     appVersion: 6.0.0
@@ -659,4 +675,4 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/valkey-0.2.0/valkey-0.2.0.tgz
     version: 0.2.0
-generated: "2026-07-07T02:35:00.869121758Z"
+generated: "2026-07-14T00:02:58.718091013Z"
