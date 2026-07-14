@@ -1,7 +1,8 @@
 ---
 apiVersion: v2
 name: heimdall-bot
-description: Heimdall — TenX Slack AI assistant (cluster investigation, on-chain lookups, Drive docs)
+description: Heimdall — TenX Slack AI assistant (cluster investigation, on-chain
+  lookups, Drive docs)
 
 maintainers:
   - name: tenxprotocols
