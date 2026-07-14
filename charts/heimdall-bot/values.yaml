@@ -1,0 +1,46 @@
+---
+# Default values for heimdall-bot.
+# This is a YAML-formatted file.
+
+image:
+  # -- Image repository
+  repository: ghcr.io/tenxprotocols/heimdall-bot
+  # -- Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# -- Name of an existing Secret with SLACK_BOT_TOKEN, SLACK_APP_TOKEN,
+# ANTHROPIC_API_KEY, ETHERSCAN_API_KEY.
+existingSecret: heimdall-bot-secret
+
+# -- Anthropic model used by the bot
+model: claude-sonnet-5
+
+holmes:
+  # -- URL of the in-cluster HolmesGPT service
+  url: http://robusta-holmes.obs.svc.cluster.local
+  # -- Model HolmesGPT uses for cluster investigations
+  model: claude-sonnet
+
+# -- Enable streaming responses in Slack
+streaming: true
+# -- Application log level
+logLevel: INFO
+
+serviceAccount:
+  # -- GSA email for Workload Identity (Drive access). Annotation omitted if empty.
+  gsaEmail: ""
+
+# -- Container resource requests and limits
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# -- Extra annotations to add to the pod template
+podAnnotations: {}
+
+# -- Image pull secrets for the private ghcr.io image, e.g. [{name: ghcr-tenx}]
+imagePullSecrets: []
