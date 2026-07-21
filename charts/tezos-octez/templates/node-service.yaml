@@ -8,6 +8,16 @@ metadata:
     app.kubernetes.io/component: node
 spec:
   type: ClusterIP
+  {{- with (.Values.node.service).sessionAffinity }}
+  {{- if ne . "None" }}
+  sessionAffinity: {{ . }}
+  {{- if eq . "ClientIP" }}
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: {{ ($.Values.node.service).sessionAffinityTimeoutSeconds | default 10800 }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
   selector:
     {{- include "tezos-octez.nodeSelectorLabels" . | nindent 4 }}
   ports:
