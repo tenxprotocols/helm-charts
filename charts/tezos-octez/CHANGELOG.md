@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.1.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v4.0.0...tezos-octez-v4.1.0) (2026-07-21)
+
+
+### Features
+
+* **tezos-octez:** add session affinity support to node service ([b419bd1](https://github.com/tenxprotocols/helm-charts/commit/b419bd18397caf912b9c8bbeb4578efc0d4ccf40))
+* **tezos-octez:** configurable node Service sessionAffinity ([#75](https://github.com/tenxprotocols/helm-charts/issues/75)) ([d7dfff0](https://github.com/tenxprotocols/helm-charts/commit/d7dfff06a4441253168837f66dd3fb36d873ee24))
+
 ## [4.0.0](https://github.com/tenxprotocols/helm-charts/compare/tezos-octez-v3.5.0...tezos-octez-v4.0.0) (2026-07-07)
 
 
