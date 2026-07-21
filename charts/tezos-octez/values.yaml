@@ -116,6 +116,20 @@ node:
     enabled: true
     port: 9932
 
+  service:
+    # Session affinity for the node RPC Service. With replicaCount > 1 the
+    # backends are independently-syncing nodes whose views briefly diverge
+    # around every new block; a client that learns a head from one backend's
+    # /monitor stream and fetches that block through the Service can land on
+    # the other backend before it has applied the block (404
+    # RPC_context.Not_found). Bakers are exactly that client, once per level.
+    # "ClientIP" pins all connections from one client pod to one backend
+    # (readiness-gated failover still applies when that backend drops out of
+    # the endpoints). "" / "None" = default kube-proxy per-connection routing.
+    sessionAffinity: ""
+    # Affinity idle expiry. Only rendered when sessionAffinity is ClientIP.
+    sessionAffinityTimeoutSeconds: 10800
+
   # Health probes. Empty {} = chart default (httpGet /version = process up).
   # For baking nodes, override readinessProbe with a sync-gated exec check so a
   # cold / catching-up node leaves the Service endpoints (no slot-critical baker
