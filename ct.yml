@@ -1,0 +1,7 @@
+# chart-testing config (auto-loaded by ct from the repo root).
+#
+# Versioning is owned by release-please (release-type: helm): it computes the
+# next version from conventional commits and bumps Chart.yaml in its release
+# PR. Feature PRs must NOT bump Chart.yaml, so ct's version-increment check
+# would fail every feature PR — disable it; all other lint rules still run.
+check-version-increment: false
