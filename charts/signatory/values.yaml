@@ -5,9 +5,18 @@
 signatory:
   config: {}
   existingConfigMap: ""
+  # When existingConfigMap is set, the chart can't hash the external configMap,
+  # so it won't roll the pods on config changes by itself. Set configChecksum to
+  # the configMap's content hash (or any revision string) and bump it whenever
+  # the external configMap changes (e.g. authorized_keys / signing policy) — the
+  # pod-template annotation change makes the Deployment roll and reload the new
+  # config. Leave empty if existingConfigMap is unset (chart hashes its own CM).
+  configChecksum: ""
 
   keys: []
   existingSecret: ""
+  # Same as configChecksum, for an external (existingSecret) signer secret.
+  secretChecksum: ""
 
 # This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
 replicaCount: 1
