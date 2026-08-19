@@ -41,6 +41,37 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/domain-exporter-0.1.0/domain-exporter-0.1.0.tgz
     version: 0.1.0
+  gomodel:
+  - apiVersion: v2
+    appVersion: 0.1.77
+    created: "2026-08-19T02:25:13.255603083Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://ghcr.io/tenxprotocols/helm-charts
+      version: 0.2.0
+    description: GoModel AI gateway — unified OpenAI/Anthropic-compatible API for
+      multiple LLM providers
+    digest: fdde9eb71dc747ae316b8255db55bdec403e62d170360376d475cac2761d5d7c
+    home: https://github.com/ENTERPILOT/GoModel
+    keywords:
+    - llm
+    - ai
+    - gateway
+    - proxy
+    - openai
+    - anthropic
+    maintainers:
+    - email: software@tenx.inc
+      name: tenxprotocols
+      url: https://github.com/tenxprotocols
+    name: gomodel
+    sources:
+    - https://github.com/ENTERPILOT/GoModel
+    type: application
+    urls:
+    - https://github.com/tenxprotocols/helm-charts/releases/download/gomodel-1.0.0/gomodel-1.0.0.tgz
+    version: 1.0.0
   heimdall-bot:
   - apiVersion: v2
     appVersion: 0.1.0
@@ -689,4 +720,4 @@ entries:
     urls:
     - https://github.com/tenxprotocols/helm-charts/releases/download/valkey-0.2.0/valkey-0.2.0.tgz
     version: 0.2.0
-generated: "2026-07-21T18:19:03.665411201Z"
+generated: "2026-08-19T02:25:13.255790916Z"
