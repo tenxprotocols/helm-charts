@@ -12,5 +12,6 @@
   "charts/falkordb": "0.2.0",
   "charts/chartdb": "1.0.0",
   "charts/tezos-baker-tail": "1.0.0",
-  "charts/heimdall-bot": "0.1.0"
+  "charts/heimdall-bot": "0.1.0",
+  "charts/gomodel": "1.0.0"
 }

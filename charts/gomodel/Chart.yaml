@@ -1,7 +1,8 @@
 ---
 apiVersion: v2
 name: gomodel
-description: GoModel AI gateway — unified OpenAI/Anthropic-compatible API for multiple LLM providers
+description: GoModel AI gateway — unified OpenAI/Anthropic-compatible API for
+  multiple LLM providers
 
 home: https://github.com/ENTERPILOT/GoModel
 sources:
@@ -21,7 +22,7 @@ maintainers:
     url: https://github.com/tenxprotocols
 
 type: application
-version: 0.1.0
+version: 1.0.0
 appVersion: "0.1.77"
 
 dependencies:
