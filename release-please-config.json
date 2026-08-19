@@ -42,6 +42,9 @@
     "charts/falkordb": {
       "component": "falkordb"
     },
+    "charts/gomodel": {
+      "component": "gomodel"
+    },
     "charts/heimdall-bot": {
       "component": "heimdall-bot"
     }

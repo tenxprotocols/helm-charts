@@ -1,0 +1,256 @@
+---
+# Default values for gomodel.
+
+# -- Global parameters shared across subcharts.
+global:
+  # -- Global image registry override.
+  imageRegistry: ""
+  # -- Global image pull secrets (merged with imagePullSecrets).
+  imagePullSecrets: []
+  # -- Global default StorageClass.
+  storageClass: ""
+
+# -- Override the chart name used in resource names.
+nameOverride: ""
+# -- Override the full release name used in resource names.
+fullnameOverride: ""
+
+# -- Labels added to all resources.
+commonLabels: {}
+# -- Annotations added to all resources.
+commonAnnotations: {}
+
+# -- Number of replicas (ignored when autoscaling is enabled).
+replicaCount: 1
+
+image:
+  # -- Container image registry and repository.
+  repository: enterpilot/gomodel
+  # -- Image pull policy.
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# -- Secrets for pulling images from private registries.
+imagePullSecrets: []
+
+serviceAccount:
+  # -- Whether to create a ServiceAccount.
+  create: true
+  # -- Automatically mount the ServiceAccount token.
+  automount: true
+  # -- Annotations to add to the ServiceAccount.
+  annotations: {}
+  # -- The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template.
+  name: ""
+
+# -- Annotations to add to the pod.
+podAnnotations: {}
+# -- Labels to add to the pod.
+podLabels: {}
+
+# -- Pod-level security context.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+
+# -- Container-level security context.
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 65532
+  capabilities:
+    drop:
+      - ALL
+
+# -- Override the container command.
+command: []
+# -- Override the container arguments.
+args: []
+
+# -- Priority class name for the pod.
+priorityClassName: ""
+
+# -- Init containers to add to the pod.
+initContainers: []
+
+service:
+  # -- Kubernetes Service type.
+  type: ClusterIP
+  # -- Primary service port.
+  port: 8080
+  # -- Additional named ports.
+  additionalPorts: []
+
+ingress:
+  # -- Enable Ingress resource.
+  enabled: false
+  # -- Ingress class name.
+  className: ""
+  # -- Ingress annotations.
+  annotations: {}
+  # -- Ingress host rules.
+  hosts:
+    - host: gomodel.local
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- TLS configuration.
+  tls: []
+
+httpRoute:
+  # -- Enable Gateway API HTTPRoute.
+  enabled: false
+  # -- HTTPRoute annotations.
+  annotations: {}
+  # -- Parent gateway references.
+  parentRefs:
+    - name: gateway
+      sectionName: http
+  # -- Hostnames matching HTTP header.
+  hostnames:
+    - gomodel.local
+  # -- Routing rules.
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+serviceMonitor:
+  # -- Enable Prometheus ServiceMonitor.
+  enabled: false
+  # -- Additional labels for ServiceMonitor discovery.
+  additionalLabels: {}
+  # -- Scrape interval.
+  interval: ""
+  # -- Scrape timeout.
+  scrapeTimeout: ""
+  # -- Port name to scrape (must match a named service port).
+  port: http
+  # -- Metrics endpoint path (keep in sync with config.METRICS_ENDPOINT).
+  path: /metrics
+  # -- MetricRelabelConfigs to apply after scraping.
+  metricRelabelings: []
+  # -- RelabelConfigs to apply before scraping.
+  relabelings: []
+
+# -- Non-sensitive GoModel configuration, rendered as environment variables
+# into a ConfigMap. See https://github.com/ENTERPILOT/GoModel/blob/main/.env.template
+# for the full list. Ignored when existingConfigMap is set.
+config:
+  PORT: "8080"
+  BASE_PATH: "/"
+  BODY_SIZE_LIMIT: "10M"
+  METRICS_ENABLED: "true"
+  METRICS_ENDPOINT: "/metrics"
+
+# -- Name of an existing ConfigMap with environment variables to use
+# instead of creating one.
+existingConfigMap: ""
+
+# -- Sensitive GoModel configuration (master key, provider API keys),
+# rendered as environment variables into a Secret.
+# e.g. GOMODEL_MASTER_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, …
+# Ignored when existingSecret is set.
+secretData: {}
+
+# -- Name of an existing Secret with environment variables to use
+# instead of creating one.
+existingSecret: ""
+
+cache:
+  # -- Redis-compatible connection URL (e.g. "redis://my-redis:6379").
+  # Auto-configured to the bundled valkey subchart when valkey.enabled is
+  # true; set explicitly to use an external instance instead.
+  redisUrl: ""
+
+# Valkey subchart (Redis-compatible cache for model/response caching).
+valkey:
+  # -- Deploy the bundled valkey subchart.
+  enabled: false
+  auth:
+    # -- Enable password authentication (chart wiring assumes no auth).
+    enabled: false
+  storage:
+    # -- Use emptyDir; cache data is disposable.
+    size: ""
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+# -- Startup probe (useful for slow-starting containers).
+startupProbe: {}
+
+# -- Resource requests and limits.
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+autoscaling:
+  # -- Enable Horizontal Pod Autoscaler.
+  enabled: false
+  # -- Minimum replicas.
+  minReplicas: 2
+  # -- Maximum replicas.
+  maxReplicas: 10
+  # -- Target CPU utilization percentage.
+  targetCPUUtilizationPercentage: 70
+  # -- Target memory utilization percentage (uncomment to enable).
+  # targetMemoryUtilizationPercentage: 80
+
+# -- Additional volumes on the pod.
+volumes: []
+# -- Additional volume mounts on the container.
+volumeMounts: []
+
+# -- Extra environment variables for the container.
+extraEnvVars: []
+# -- ConfigMap name containing extra environment variables.
+extraEnvVarsCM: ""
+# -- Secret name containing extra environment variables.
+extraEnvVarsSecret: ""
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# -- Topology spread constraints for pod scheduling.
+topologySpreadConstraints: []
+
+pdb:
+  # -- Enable PodDisruptionBudget.
+  enabled: false
+  # -- Minimum available pods (number or percentage).
+  minAvailable: ""
+  # -- Maximum unavailable pods (number or percentage).
+  maxUnavailable: ""
+
+networkPolicy:
+  # -- Enable NetworkPolicy.
+  enabled: false
+  # -- Ingress rules (empty = deny all; [{}] = allow all).
+  ingress: []
+  # -- Egress rules (empty = deny all; [{}] = allow all).
+  egress: []

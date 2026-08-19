@@ -1,0 +1,6 @@
+dependencies:
+- name: valkey
+  repository: oci://ghcr.io/tenxprotocols/helm-charts
+  version: 0.2.0
+digest: sha256:57d73feebc639afd555b91af8a55d03eb07b541d56c5d4fcf9d0b317d27fe35d
+generated: "2026-08-18T19:05:37.313525-07:00"

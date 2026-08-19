@@ -1,0 +1,31 @@
+---
+apiVersion: v2
+name: gomodel
+description: GoModel AI gateway — unified OpenAI/Anthropic-compatible API for multiple LLM providers
+
+home: https://github.com/ENTERPILOT/GoModel
+sources:
+  - https://github.com/ENTERPILOT/GoModel
+
+keywords:
+  - llm
+  - ai
+  - gateway
+  - proxy
+  - openai
+  - anthropic
+
+maintainers:
+  - name: tenxprotocols
+    email: software@tenx.inc
+    url: https://github.com/tenxprotocols
+
+type: application
+version: 0.1.0
+appVersion: "0.1.77"
+
+dependencies:
+  - name: valkey
+    version: "0.2.0"
+    repository: "oci://ghcr.io/tenxprotocols/helm-charts"
+    condition: valkey.enabled

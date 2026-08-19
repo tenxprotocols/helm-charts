@@ -1,0 +1,9 @@
+---
+# Minimal values for chart-testing (ct install).
+# Exercises the bundled valkey cache wiring inside a KIND cluster.
+
+valkey:
+  enabled: true
+
+secretData:
+  GOMODEL_MASTER_KEY: ct-test-key

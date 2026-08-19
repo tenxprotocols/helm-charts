@@ -7,6 +7,7 @@ A collection of Helm charts maintained by [TenX](https://github.com/tenxprotocol
 | Chart | Description |
 |-------|-------------|
 | [chartdb](charts/chartdb) | Open-source database diagram editor |
+| [gomodel](charts/gomodel) | GoModel AI gateway — unified OpenAI/Anthropic-compatible API for multiple LLM providers |
 | [http-exporter](charts/http-exporter) | A flexible OpenMetrics exporter for HTTP (RPC and REST) endpoints |
 | [juicefs](charts/juicefs) | JuiceFS S3 Gateway with PostgreSQL metadata engine |
 | [signatory](charts/signatory) | A Helm chart for Signatory - a Tezos Remote Signer |
