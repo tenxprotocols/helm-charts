@@ -11,5 +11,6 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "gomodel.fullname" . }}:{{ .Values.service.port }}']
+      # /health is exempt from master-key auth; "/" would return 401 when auth is enabled.
+      args: ['{{ include "gomodel.fullname" . }}:{{ .Values.service.port }}/health']
   restartPolicy: Never
